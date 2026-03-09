@@ -1,0 +1,744 @@
+{
+  "id": "ppl-fb",
+  "name": "Rotina 26 fit Medianeira",
+  "workouts": [
+    {
+      "id": "ppl-push",
+      "dayOfWeek": "MONDAY",
+      "description": "Push Day",
+      "exercises": [
+        {
+          "id": "ppl-push-e0",
+          "name": "Supino Reto Máquina",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Chest",
+          "sets": [
+            {
+              "id": "ppl-push-e0-s0",
+              "type": "WarmUpSet",
+              "restTime": "NO_REST"
+            },
+            {
+              "id": "ppl-push-e0-s1",
+              "type": "RampUpSet",
+              "restTime": "SEG_60"
+            },
+            {
+              "id": "ppl-push-e0-s2",
+              "type": "WorkSet",
+              "restTime": "SEG_120"
+            },
+            {
+              "id": "ppl-push-e0-s3",
+              "type": "TopSet",
+              "restTime": "SEG_180"
+            }
+          ]
+        },
+        {
+          "id": "ppl-push-e1",
+          "name": "Voador",
+          "description": "Voador da Medianeira",
+          "muscleGroup": "Chest",
+          "sets": [
+            {
+              "id": "ppl-push-e1-s0",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-push-e1-s1",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-push-e1-s2",
+              "restTime": "SEG_180",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-push-e3",
+          "name": "Crucifixo Inclinado Polia",
+          "description": "Polia da Medianeira",
+          "muscleGroup": "Chest",
+          "sets": [
+            {
+              "id": "ppl-push-e3-s0",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-push-e3-s1",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-push-e4",
+          "name": "Desenvolvimento Máquina",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Shoulders",
+          "sets": [
+            {
+              "id": "ppl-push-e4-s0",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-push-e4-s1",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-push-e4-s2",
+              "restTime": "SEG_180",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-push-e5",
+          "name": "Elevação Lateral Máquina Unilateral",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Shoulders",
+          "sets": [
+            {
+              "id": "ppl-push-e5-s0",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-push-e5-s1",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-push-e5-s2",
+              "restTime": "SEG_180",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-push-e6",
+          "name": "Tríceps Francês Polia Unilateral",
+          "description": "Polia da Medianeira",
+          "muscleGroup": "Triceps",
+          "sets": [
+            {
+              "id": "ppl-push-e6-s0",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-push-e6-s1",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-push-e6-s2",
+              "restTime": "SEG_180",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-push-e7",
+          "name": "Panturrilha Sentado",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Calves",
+          "sets": [
+            {
+              "id": "ppl-push-e7-s0",
+              "type": "WarmUpSet",
+              "restTime": "NO_REST"
+            },
+            {
+              "id": "ppl-push-e7-s1",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-push-e7-s2",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-push-e7-s3",
+              "restTime": "SEG_180",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-push-e8",
+          "name": "Abdominal Infra na Torre",
+          "description": "",
+          "muscleGroup": "Core",
+          "sets": [
+            {
+              "id": "ppl-push-e8-s0",
+              "restTime": "NO_REST",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-push-e8-s1",
+              "restTime": "SEG_60",
+              "type": "WorkSet"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ppl-pull",
+      "dayOfWeek": "TUESDAY",
+      "description": "Pull Day",
+      "exercises": [
+        {
+          "id": "ppl-pull-e0",
+          "name": "Low Row",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Back",
+          "sets": [
+            {
+              "id": "ppl-pull-e0-s0",
+              "restTime": "NO_REST",
+              "type": "WarmUpSet"
+            },
+            {
+              "id": "ppl-pull-e0-s1",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-pull-e0-s2",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-pull-e0-s3",
+              "restTime": "SEG_180",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-pull-e1",
+          "name": "High Row",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Back",
+          "sets": [
+            {
+              "id": "ppl-pull-e1-s0",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-pull-e1-s1",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-pull-e1-s2",
+              "restTime": "SEG_180",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-pull-e2",
+          "name": "Remada Horizontal Unilateral",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Back",
+          "sets": [
+            {
+              "id": "ppl-pull-e2-s0",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-pull-e2-s1",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-pull-e2-s2",
+              "restTime": "SEG_180",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-pull-e3",
+          "name": "Posterior de Ombro no Voador",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Shoulders",
+          "sets": [
+            {
+              "id": "ppl-pull-e3-s0",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-pull-e2-s1",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-pull-e2-s2",
+              "restTime": "SEG_180",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-pull-e4",
+          "name": "Rosca Scott Unilateral com Halter",
+          "description": "",
+          "muscleGroup": "Biceps",
+          "sets": [
+            {
+              "id": "ppl-pull-e4-s0",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-pull-e4-s1",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-pull-e4-s2",
+              "restTime": "SEG_180",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-pull-e5",
+          "name": "Rosca Punho com Halter",
+          "description": "",
+          "muscleGroup": "Forearms",
+          "sets": [
+            {
+              "id": "ppl-pull-e5-s1",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-pull-e5-s2",
+              "restTime": "SEG_180",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-pull-e6",
+          "name": "Extensora Lombar com Anilha",
+          "description": "",
+          "muscleGroup": "Core",
+          "sets": [
+            {
+              "id": "ppl-pull-e6-s1",
+              "restTime": "SEG_90",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-pull-e6-s2",
+              "restTime": "SEG_90",
+              "type": "WorkSet"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ppl-legs",
+      "dayOfWeek": "FRIDAY",
+      "description": "Leg Day",
+      "exercises": [
+        {
+          "id": "ppl-legs-e0",
+          "name": "Cadeira Extensora Unilateral",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Quads",
+          "sets": [
+            {
+              "id": "ppl-legs-e0-s0",
+              "restTime": "NO_REST",
+              "type": "WarmUpSet"
+            },
+            {
+              "id": "ppl-legs-e0-s1",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-legs-e0-s2",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-legs-e0-s3",
+              "restTime": "SEG_120",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-legs-e1",
+          "name": "Cadeira Flexora Simultanea",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Hamstrings",
+          "sets": [
+            {
+              "id": "ppl-legs-e1-s0",
+              "restTime": "NO_REST",
+              "type": "WarmUpSet"
+            },
+            {
+              "id": "ppl-legs-e1-s1",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-legs-e1-s2",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-legs-e1-s3",
+              "restTime": "SEG_180",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-legs-e2",
+          "name": "Leg Press",
+          "description": "Leg Press da Medianeira",
+          "muscleGroup": "Quads",
+          "sets": [
+            {
+              "id": "ppl-legs-e2-s0",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-legs-e2-s1",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-legs-e2-s2",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-legs-e2-s3",
+              "restTime": "SEG_180",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-legs-e3",
+          "name": "Flexora Unilateral",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Hamstrings",
+          "sets": [
+            {
+              "id": "ppl-legs-e3-s0",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-legs-e3-s1",
+              "restTime": "SEG_90",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-legs-e3-s2",
+              "restTime": "SEG_120",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-legs-e4",
+          "name": "Panturrilha em Pé Máquina",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Calves",
+          "sets": [
+            {
+              "id": "ppl-legs-e4-s0",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-legs-e4-s1",
+              "restTime": "SEG_90",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-legs-e4-s2",
+              "restTime": "SEG_120",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-legs-e5",
+          "name": "Cadeira Adutora",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Quads",
+          "sets": [
+            {
+              "id": "ppl-legs-e5-s0",
+              "restTime": "NO_REST",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-legs-e5-s1",
+              "restTime": "SEG_60",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-legs-e5-s2",
+              "restTime": "SEG_120",
+              "type": "TopSet"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ppl-fb", 
+      "dayOfWeek": "SATURDAY",
+      "description": "Full Body",
+      "exercises": [
+        {
+          "id": "ppl-fb-e0",
+          "name": "Supino Inclinado Máquina",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Chest",
+          "sets": [
+            {
+              "id": "ppl-fb-e0-s0",
+              "restTime": "NO_REST",
+              "type": "WarmUpSet"
+            },
+            {
+              "id": "ppl-fb-e0-s1",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-fb-e0-s2",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-fb-e0-s3",
+              "restTime": "SEG_120",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-fb-e1",
+          "name": "Polley Frente Neutra",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Back",
+          "sets": [
+            {
+              "id": "ppl-fb-e1-s0",
+              "restTime": "NO_REST",
+              "type": "WarmUpSet"
+            },
+            {
+              "id": "ppl-fb-e1-s1",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-fb-e1-s2",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-fb-e1-s3",
+              "restTime": "SEG_120",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-fb-e2",
+          "name": "Remada Unilateral Máquina",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Back",
+          "sets": [
+            {
+              "id": "ppl-fb-e2-s0",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-fb-e2-s1",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-fb-e2-s2",
+              "restTime": "SEG_120",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-fb-e3",
+          "name": "Agachamento Pendular",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Quads",
+          "sets": [
+            {
+              "id": "ppl-fb-e3-s0",
+              "restTime": "NO_REST",
+              "type": "WarmUpSet"
+            },
+            {
+              "id": "ppl-fb-e3-s1",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-fb-e3-s2",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-fb-e3-s3",
+              "restTime": "SEG_180",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-fb-e4",
+          "name": "Abdução Pélvica Máquina",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Glutes",
+          "sets": [
+            {
+              "id": "ppl-fb-e4-s0",
+              "restTime": "NO_REST",
+              "type": "WarmUpSet"
+            },
+            {
+              "id": "ppl-fb-e4-s1",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-fb-e4-s2",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-fb-e4-s3",
+              "restTime": "SEG_180",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-fb-e5",
+          "name": "Rosca Martelo Alternada Halter",
+          "description": "",
+          "muscleGroup": "Biceps",
+          "sets": [
+            {
+              "id": "ppl-fb-e5-s0",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-fb-e5-s1",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-fb-e5-s2",
+              "restTime": "SEG_120",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-fb-e6",
+          "name": "Triceps Testa Polia",
+          "description": "Polia da Medianeira",
+          "muscleGroup": "Triceps",
+          "sets": [
+            {
+              "id": "ppl-fb-e6-s0",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-fb-e6-s1",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-fb-e6-s2",
+              "restTime": "SEG_120",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-fb-e7",
+          "name": "Elevação Lateral Polia",
+          "description": "Polia da Vincent, altura média",
+          "muscleGroup": "Shoulders",
+          "sets": [
+            {
+              "id": "ppl-fb-e7-s0",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-fb-e7-s1",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-fb-e8",
+          "name": "Posterior Polia Unilateral",
+          "description": "Polia da Medianeira",
+          "muscleGroup": "Shoulders",
+          "sets": [
+            {
+              "id": "ppl-fb-e8-s0",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-fb-e8-s1",
+              "restTime": "SEG_120",
+              "type": "WorkSet"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

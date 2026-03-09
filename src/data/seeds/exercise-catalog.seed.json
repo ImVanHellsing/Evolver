@@ -1,0 +1,147 @@
+[
+  {
+    "id": "supino-reto-maquina",
+    "name": "Supino Reto Máquina",
+    "muscleGroup": "Chest"
+  },
+  {
+    "id": "voador",
+    "name": "Voador",
+    "muscleGroup": "Chest"
+  },
+  {
+    "id": "crucifixo-inclinado-polia",
+    "name": "Crucifixo Inclinado Polia",
+    "muscleGroup": "Chest"
+  },
+  {
+    "id": "desenvolvimento-maquina",
+    "name": "Desenvolvimento Máquina",
+    "muscleGroup": "Shoulders"
+  },
+  {
+    "id": "elevacao-lateral-maquina-unilateral",
+    "name": "Elevação Lateral Máquina Unilateral",
+    "muscleGroup": "Shoulders"
+  },
+  {
+    "id": "triceps-frances-polia-unilateral",
+    "name": "Tríceps Francês Polia Unilateral",
+    "muscleGroup": "Triceps"
+  },
+  {
+    "id": "panturrilha-sentado",
+    "name": "Panturrilha Sentado",
+    "muscleGroup": "Calves"
+  },
+  {
+    "id": "remanda-aberta-trilho",
+    "name": "Remanda Aberta Trilho",
+    "muscleGroup": "Back"
+  },
+  {
+    "id": "puxada-neutra-maquina",
+    "name": "Puxada Neutra Máquina",
+    "muscleGroup": "Back"
+  },
+  {
+    "id": "remada-horizontal-unilateral",
+    "name": "Remada Horizontal Unilateral",
+    "muscleGroup": "Back"
+  },
+  {
+    "id": "posterior-de-ombro-no-voador",
+    "name": "Posterior de Ombro no Voador",
+    "muscleGroup": "Shoulders"
+  },
+  {
+    "id": "rosca-scott-simultanea",
+    "name": "Rosca Scott Simultanea",
+    "muscleGroup": "Biceps"
+  },
+  {
+    "id": "rosca-punho-com-halter",
+    "name": "Rosca Punho com Halter",
+    "muscleGroup": "Forearms"
+  },
+  {
+    "id": "extensora-lombar-com-anilha",
+    "name": "Extensora Lombar com Anilha",
+    "muscleGroup": "Core"
+  },
+  {
+    "id": "cadeira-extensora-unilateral",
+    "name": "Cadeira Extensora Unilateral",
+    "muscleGroup": "Quads"
+  },
+  {
+    "id": "cadeira-flexora-simultanea",
+    "name": "Cadeira Flexora Simultanea",
+    "muscleGroup": "Hamstrings"
+  },
+  {
+    "id": "leg-press",
+    "name": "Leg Press",
+    "muscleGroup": "Quads"
+  },
+  {
+    "id": "flexora-unilateral",
+    "name": "Flexora Unilateral",
+    "muscleGroup": "Hamstrings"
+  },
+  {
+    "id": "panturrilha-no-leg-press",
+    "name": "Panturrilha no Leg Press",
+    "muscleGroup": "Calves"
+  },
+  {
+    "id": "cadeira-adutora",
+    "name": "Cadeira Adutora",
+    "muscleGroup": "Quads"
+  },
+  {
+    "id": "abdominal-infra-na-torre",
+    "name": "Abdominal Infra na Torre",
+    "muscleGroup": "Core"
+  },
+  {
+    "id": "supino-inclinado-maquina",
+    "name": "Supino Inclinado Máquina",
+    "muscleGroup": "Chest"
+  },
+  {
+    "id": "high-row",
+    "name": "High Row",
+    "muscleGroup": "Back"
+  },
+  {
+    "id": "remanda-neutra-maquina",
+    "name": "Remanda Neutra Máquina",
+    "muscleGroup": "Back"
+  },
+  {
+    "id": "agachamento-hack",
+    "name": "Agachamento Hack",
+    "muscleGroup": "Quads"
+  },
+  {
+    "id": "elevacao-pelvica",
+    "name": "Elevação Pélvica",
+    "muscleGroup": "Glutes"
+  },
+  {
+    "id": "rosca-inclinada-halter",
+    "name": "Rosca Inclinada Halter",
+    "muscleGroup": "Biceps"
+  },
+  {
+    "id": "triceps-corda-unilateral",
+    "name": "Triceps Corda Unilateral",
+    "muscleGroup": "Triceps"
+  },
+  {
+    "id": "elevacao-lateral-polia",
+    "name": "Elevação Lateral Polia",
+    "muscleGroup": "Shoulders"
+  }
+]

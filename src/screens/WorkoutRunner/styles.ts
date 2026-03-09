@@ -1,0 +1,183 @@
+import { StyleSheet } from 'react-native';
+
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  scrollContent: {
+    flex: 1,
+    padding: 24,
+  },
+  title: {
+    width: '100%',
+    fontSize: 16,
+    fontWeight: '500',
+    textAlign: 'center',
+    paddingVertical: 16,
+    backgroundColor: 'black',
+    color: 'white',
+  },
+  exerciseInfoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingBottom: 24,
+    gap: 24,
+  },
+  exerciseInfoTextContainer: {
+    flex: 1,
+    gap: 8
+  },
+  muscleBadge: {
+    width: 60,
+    height: 60,
+    backgroundColor: '#000',
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  muscleText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  exerciseName: {
+    fontSize: 24,
+    fontWeight: '500',
+  },
+  currentSetType: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  setFormContent: {
+    flex: 1,
+    paddingTop: 24,
+    gap: 24,
+  },
+  inputContainer: {
+    gap: 8,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: 'black',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 16,
+    color: '#000',
+    backgroundColor: '#f9f9f9',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#ddd',
+  },
+  setTypeSelector: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  setTypeChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    backgroundColor: '#fff',
+  },
+  setTypeChipSelected: {
+    backgroundColor: 'black',
+    borderColor: 'black',
+  },
+  setTypeChipText: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
+  },
+  setTypeChipTextSelected: {
+    color: 'white',
+  },
+  saveButton: {
+    width: '75%',
+    backgroundColor: 'black',
+    padding: 16,
+    borderRadius: 8,
+  },
+  saveButtonText: {
+    color: 'white',
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: 16,
+    textTransform: 'uppercase',
+  },
+  waitingText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#000',
+    marginHorizontal: 12,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#000',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  fabIcon: {
+    fontSize: 32,
+    color: 'white',
+    fontWeight: 'bold',
+    marginTop: -4,
+  },
+  timerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.95)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  timerTitle: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 40,
+    textTransform: 'uppercase',
+  },
+  timerSeconds: {
+    color: 'white',
+    fontSize: 120,
+    fontWeight: '800',
+    fontVariant: ['tabular-nums'],
+  },
+  timerLabel: {
+    color: '#8E8E93',
+    fontSize: 18,
+    marginTop: -10,
+    marginBottom: 60,
+  },
+  skipTimerButton: {
+    paddingHorizontal: 40,
+    paddingVertical: 16,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: 'white',
+  },
+  skipTimerText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});

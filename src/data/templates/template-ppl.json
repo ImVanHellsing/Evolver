@@ -1,0 +1,64 @@
+{  
+    "id": "ppl-test",
+    "name": "Rotina Teste",
+    "workouts": [
+      {
+        "id": "ppl-push",
+        "dayOfWeek": "MONDAY",
+        "description": "Push Day",
+        "exercises": [
+          {
+            "id": "ppl-push-e0",
+            "name": "Supino Reto Máquina",
+            "description": "Máquina da Vincent",
+            "muscleGroup": "Chest",
+            "sets": [
+              {
+                "id": "ppl-push-e0-s0",
+                "type": "WarmUpSet",
+                "restTime": "NO_REST"
+              },
+              {
+                "id": "ppl-push-e0-s1",
+                "type": "RampUpSet",
+                "restTime": "SEG_60"
+              },
+              {
+                "id": "ppl-push-e0-s2",
+                "type": "WorkSet",
+                "restTime": "SEG_120"
+              },
+              {
+                "id": "ppl-push-e0-s3",
+                "type": "TopSet",
+                "restTime": "SEG_180"
+              }
+            ]
+          },
+          {
+            "id": "ppl-push-e1",
+            "name": "Voador",
+            "description": "Voador da Vincent",
+            "muscleGroup": "Chest",
+            "sets": [
+              {
+                "id": "ppl-push-e1-s0",
+                "restTime": "SEG_60",
+                "type": "RampUpSet"
+              },
+              {
+                "id": "ppl-push-e1-s1",
+                "restTime": "SEG_120",
+                "type": "WorkSet"
+              },
+              {
+                "id": "ppl-push-e1-s2",
+                "restTime": "SEG_180",
+                "type": "TopSet"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+}
