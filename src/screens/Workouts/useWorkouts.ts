@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { WorkoutTemplate, WorkoutSession } from '@/models/Workout';
 import { workoutSessionsRepository } from '@/services/workouts/workoutSessionsRepository';
@@ -26,10 +27,12 @@ export const useWorkouts = ({ routineTemplateId, workouts }: UseWorkoutsArgs) =>
     setIsLoading(false);
   };
 
-  useEffect(() => {
-    reload();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [routineTemplateId]);
+  useFocusEffect(
+    useCallback(() => {
+      reload();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [routineTemplateId])
+  );
 
   const workoutsWithLastSession: WorkoutWithLastSession[] = useMemo(() => {
     const sortedWorkouts = workouts

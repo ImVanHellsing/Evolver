@@ -10,11 +10,13 @@ export const styles = StyleSheet.create({
 	title: {
 		fontSize: 28,
 		fontWeight: '700',
+		color: '#000',
 	},
 	subtitle: {
 		fontSize: 14,
 		opacity: 0.75,
 		marginBottom: 8,
+		color: '#000',
 	},
 	buttons: {
 		gap: 12,
@@ -31,9 +33,11 @@ export const styles = StyleSheet.create({
 		fontSize: 18,
 		fontWeight: '700',
 		marginBottom: 4,
+		color: '#000',
 	},
 	bigButtonDesc: {
 		fontSize: 13,
 		opacity: 0.8,
+		color: '#000',
 	},
 });

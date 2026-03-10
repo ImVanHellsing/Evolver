@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, Pressable, TextInput, ScrollView } from 'react-native';
+import { Text, View, Pressable, TextInput, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 
 import { useAppRouteParams } from '@/hooks/useAppRouteParams';
 import { useWorkoutRunner } from './useWorkoutRunner';
@@ -45,7 +45,10 @@ export const WorkoutRunnerScreen = () => {
   } = useWorkoutRunner(routineTemplateId, workout);
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <Header title={workout.dayOfWeek} onActionPress={onEndPressed} showBackButton />
       <Text style={styles.title}>{hint}</Text>
 
@@ -174,6 +177,6 @@ export const WorkoutRunnerScreen = () => {
           </Pressable>
         </View>
       )}
-    </View>
+    </KeyboardAvoidingView>
   );
 }

@@ -13,6 +13,7 @@ export const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     marginBottom: 16,
+    color: '#000',
   },
   hint: {
     fontSize: 14,
@@ -32,10 +33,12 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 4,
+    color: '#000',
   },
   bigButtonDesc: {
     fontSize: 13,
     opacity: 0.8,
+    color: '#000',
   },
   summaryButton: {
     backgroundColor: '#f0f0f0',
@@ -68,6 +71,7 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 20,
     textAlign: 'center',
+    color: '#000',
   },
   volumeItem: {
     flexDirection: 'row',
@@ -79,6 +83,7 @@ export const styles = StyleSheet.create({
   volumeMuscle: {
     fontSize: 16,
     fontWeight: '500',
+    color: '#000',
   },
   volumeCount: {
     fontSize: 16,

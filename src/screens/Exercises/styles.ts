@@ -18,6 +18,7 @@ export const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     marginBottom: 16,
+    color: '#000',
   },
   hint: {
     fontSize: 16,
@@ -36,10 +37,12 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 4,
+    color: '#000',
   },
   bigButtonDesc: {
     fontSize: 13,
     opacity: 0.8,
+    color: '#000',
   },
   fab: {
     position: 'absolute',

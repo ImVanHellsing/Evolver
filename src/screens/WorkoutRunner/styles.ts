@@ -45,10 +45,12 @@ export const styles = StyleSheet.create({
   exerciseName: {
     fontSize: 24,
     fontWeight: '500',
+    color: '#000',
   },
   currentSetType: {
     fontSize: 16,
     fontWeight: '500',
+    color: '#000',
   },
   setFormContent: {
     flex: 1,

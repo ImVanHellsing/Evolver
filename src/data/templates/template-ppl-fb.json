@@ -172,24 +172,6 @@
               "type": "TopSet"
             }
           ]
-        },
-        {
-          "id": "ppl-push-e8",
-          "name": "Abdominal Infra na Torre",
-          "description": "",
-          "muscleGroup": "Core",
-          "sets": [
-            {
-              "id": "ppl-push-e8-s0",
-              "restTime": "NO_REST",
-              "type": "WorkSet"
-            },
-            {
-              "id": "ppl-push-e8-s1",
-              "restTime": "SEG_60",
-              "type": "WorkSet"
-            }
-          ]
         }
       ]
     },
@@ -513,6 +495,24 @@
               "type": "TopSet"
             }
           ]
+        },
+        {
+          "id": "ppl-legs-e6",
+          "name": "Abdominal Infra na Torre",
+          "description": "",
+          "muscleGroup": "Core",
+          "sets": [
+            {
+              "id": "ppl-legs-e6-s0",
+              "restTime": "NO_REST",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-legs-e6-s1",
+              "restTime": "SEG_60",
+              "type": "WorkSet"
+            }
+          ]
         }
       ]
     },
@@ -579,29 +579,6 @@
         },
         {
           "id": "ppl-fb-e2",
-          "name": "Remada Unilateral Máquina",
-          "description": "Máquina da Medianeira",
-          "muscleGroup": "Back",
-          "sets": [
-            {
-              "id": "ppl-fb-e2-s0",
-              "restTime": "SEG_60",
-              "type": "RampUpSet"
-            },
-            {
-              "id": "ppl-fb-e2-s1",
-              "restTime": "SEG_120",
-              "type": "WorkSet"
-            },
-            {
-              "id": "ppl-fb-e2-s2",
-              "restTime": "SEG_120",
-              "type": "TopSet"
-            }
-          ]
-        },
-        {
-          "id": "ppl-fb-e3",
           "name": "Agachamento Pendular",
           "description": "Máquina da Medianeira",
           "muscleGroup": "Quads",
@@ -629,7 +606,7 @@
           ]
         },
         {
-          "id": "ppl-fb-e4",
+          "id": "ppl-fb-e3",
           "name": "Abdução Pélvica Máquina",
           "description": "Máquina da Medianeira",
           "muscleGroup": "Glutes",
@@ -657,7 +634,7 @@
           ]
         },
         {
-          "id": "ppl-fb-e5",
+          "id": "ppl-fb-e4",
           "name": "Rosca Martelo Alternada Halter",
           "description": "",
           "muscleGroup": "Biceps",
@@ -680,7 +657,7 @@
           ]
         },
         {
-          "id": "ppl-fb-e6",
+          "id": "ppl-fb-e5",
           "name": "Triceps Testa Polia",
           "description": "Polia da Medianeira",
           "muscleGroup": "Triceps",
@@ -703,7 +680,7 @@
           ]
         },
         {
-          "id": "ppl-fb-e7",
+          "id": "ppl-fb-e6",
           "name": "Elevação Lateral Polia",
           "description": "Polia da Vincent, altura média",
           "muscleGroup": "Shoulders",
@@ -721,7 +698,7 @@
           ]
         },
         {
-          "id": "ppl-fb-e8",
+          "id": "ppl-fb-e7",
           "name": "Posterior Polia Unilateral",
           "description": "Polia da Medianeira",
           "muscleGroup": "Shoulders",

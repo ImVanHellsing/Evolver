@@ -26,10 +26,12 @@ export const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 4,
+    color: '#000',
   },
   desc: {
     fontSize: 13,
     opacity: 0.8,
+    color: '#000',
   },
   muscleBadge: {
     backgroundColor: '#000',
