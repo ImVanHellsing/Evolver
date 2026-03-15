@@ -52,7 +52,11 @@ export const WorkoutRunnerScreen = () => {
       <Header title={workout.dayOfWeek} onActionPress={onEndPressed} showBackButton />
       <Text style={styles.title}>{hint}</Text>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets={true}
+      >
 
         <View style={styles.exerciseInfoContainer}>
 
@@ -66,6 +70,12 @@ export const WorkoutRunnerScreen = () => {
           </View>
 
         </View>
+
+        {!!currentExercise.description && (
+          <View style={styles.exerciseDescriptionContainer}>
+            <Text style={styles.exerciseDescriptionText}>{currentExercise.description}</Text>
+          </View>
+        )}
 
         <View style={styles.divider} />
 

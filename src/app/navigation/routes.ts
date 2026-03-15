@@ -24,7 +24,8 @@ export type RootStackParamList = {
 	};
 	[Routes.WorkoutRunner]: {
 		routineTemplateId: string,
-		workout: WorkoutTemplate
+		workout: WorkoutTemplate,
+		resume?: boolean
 	};
 	[Routes.WorkoutSessionDetail]: {
 		session: import("@/models/Workout").WorkoutSession

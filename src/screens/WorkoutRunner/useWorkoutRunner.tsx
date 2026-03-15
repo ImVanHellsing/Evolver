@@ -1,16 +1,22 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { Vibration } from 'react-native';
 
 import { useAppNavigation } from '@/hooks/useAppNavigation';
+import { useAppRouteParams } from '@/hooks/useAppRouteParams';
 import { SetType } from '@/models/SetType';
 import { WorkoutSession, WorkoutTemplate } from '@/models/Workout';
 import { ExerciseLog } from '@/models/Exercise';
 import { SetLog } from '@/models/Set';
 import { FailureType } from '@/models/FailureType';
 import { workoutSessionsRepository } from '@/services/workouts/workoutSessionsRepository';
+import { activeWorkoutSessionRepository } from '@/services/workouts/activeWorkoutSessionRepository';
 import { getRestTimeTypeSeconds } from '@/models/RestTimeType';
 
 export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemplate) => {
   const navigation = useAppNavigation();
+  const routeParams = useAppRouteParams<'WorkoutRunner'>();
+  const isResuming = routeParams.resume === true;
+  const hasRestoredSessionRef = useRef(false);
 
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [currentSetIndex, setCurrentSetIndex] = useState(0);
@@ -30,6 +36,7 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
 
   const [isResting, setIsResting] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(0);
+  const [timerEndTime, setTimerEndTime] = useState<number | null>(null);
 
   const [savedWorkoutSession, setSavedWorkoutSession] = useState<WorkoutSession>({
     id: `workout-sessions-${new Date().toISOString()}`,
@@ -38,6 +45,58 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     date: new Date(),
     exercises: [],
   });
+
+  // RESTORE SESSION
+  useEffect(() => {
+    if (isResuming && !hasRestoredSessionRef.current) {
+      const restoreSession = async () => {
+        const savedData = await activeWorkoutSessionRepository.getActiveSession();
+        if (savedData) {
+          setSavedWorkoutSession(savedData.savedWorkoutSession);
+          setCurrentExerciseIndex(savedData.currentExerciseIndex);
+          setCurrentSetIndex(savedData.currentSetIndex);
+          setWeight(savedData.weight);
+          setReps(savedData.reps);
+          setObservation(savedData.observation);
+          setIsResting(savedData.isResting);
+          setTimerEndTime(savedData.timerEndTime);
+        }
+        hasRestoredSessionRef.current = true;
+      };
+      restoreSession();
+    } else {
+      hasRestoredSessionRef.current = true;
+    }
+  }, [isResuming]);
+
+  // SAVE SESSION
+  useEffect(() => {
+    if (hasRestoredSessionRef.current) {
+      activeWorkoutSessionRepository.saveActiveSession({
+        routineTemplateId,
+        workout,
+        savedWorkoutSession,
+        currentExerciseIndex,
+        currentSetIndex,
+        weight,
+        reps,
+        observation,
+        isResting,
+        timerEndTime
+      });
+    }
+  }, [
+    savedWorkoutSession, 
+    currentExerciseIndex, 
+    currentSetIndex, 
+    weight, 
+    reps, 
+    observation, 
+    isResting, 
+    timerEndTime,
+    routineTemplateId,
+    workout
+  ]);
 
   const clearSetForm = () => {
     setWeight('');
@@ -69,10 +128,21 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     }
   }
 
+  const getNextSetRestTime = () => {
+    if (handleHasNextSet()) {
+      return currentExercise.sets[currentSetIndex + 1].restTime;
+    } else if (handleHasNextExercise()) {
+      return workout.exercises[currentExerciseIndex + 1].sets[0].restTime;
+    }
+    return undefined;
+  }
+
   const startRestTimer = () => {
-    const restSeconds = getRestTimeTypeSeconds(currentSet.restTime);
-    console.log(restSeconds);
+    const nextRestTime = getNextSetRestTime();
+    const restSeconds = getRestTimeTypeSeconds(nextRestTime);
+
     if (restSeconds > 0) {
+      setTimerEndTime(Date.now() + restSeconds * 1000);
       setSecondsLeft(restSeconds);
       setIsResting(true);
     } else {
@@ -101,23 +171,28 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
 
   useEffect(() => {
     let timer: ReturnType<typeof setInterval>;
-    if (isResting && secondsLeft > 0) {
+    if (isResting && timerEndTime) {
       timer = setInterval(() => {
-        setSecondsLeft(prev => prev - 1);
+        const remaining = Math.max(0, Math.ceil((timerEndTime - Date.now()) / 1000));
+        setSecondsLeft(remaining);
+
+        if (remaining === 0) {
+          Vibration.vibrate([0, 1000, 200, 1000, 200, 1000]);
+          setIsResting(false);
+          setTimerEndTime(null);
+          goToNextSet();
+        }
       }, 1000);
-    } else if (isResting && secondsLeft === 0) {
-      setIsResting(false);
-      goToNextSet();
     }
     return () => clearInterval(timer);
-
-  }, [isResting, secondsLeft]);
+  }, [isResting, timerEndTime]);
 
   const onEndPressed = () => {
     navigation.goBack();
   }
 
-  const onConfirmExit = () => {
+  const onConfirmExit = async () => {
+    await activeWorkoutSessionRepository.clearActiveSession();
     setIsExitModalVisible(false);
     navigation.dispatch(isExitModalVisible as any);
   }
@@ -138,6 +213,7 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     console.log('-------------------------');
 
     await workoutSessionsRepository.save(finalWorkoutSession);
+    await activeWorkoutSessionRepository.clearActiveSession();
 
     setIsFinishModalVisible(false);
     navigation.goBack();

@@ -1,6 +1,6 @@
 {
   "name": "Evolver",
-  "version": "0.0.1",
+  "version": "1.2.3",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -11,7 +11,8 @@
     "test": "jest",
     "android:dev": "react-native run-android --mode devDebug --appId com.evolver.dev",
     "android:hml": "react-native run-android --mode hmlDebug --appId com.evolver",
-    "android:hml:release": "cd android && gradlew.bat assembleHmlRelease"
+    "android:hml:release": "cd android && gradlew.bat assembleHmlRelease",
+    "install:apk": "cd android && adb install -r app/build/outputs/apk/hml/release/app-hml-release.apk"
   },
   "dependencies": {
     "react": "19.1.0",

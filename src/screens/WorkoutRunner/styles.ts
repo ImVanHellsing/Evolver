@@ -6,7 +6,7 @@ export const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   scrollContent: {
-    flex: 1,
+    flexGrow: 1,
     padding: 24,
   },
   title: {
@@ -52,9 +52,23 @@ export const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#000',
   },
+  exerciseDescriptionContainer: {
+    backgroundColor: '#f5f5f5',
+    padding: 12,
+    borderRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#000',
+    marginBottom: 16,
+  },
+  exerciseDescriptionText: {
+    fontSize: 14,
+    color: '#333',
+    fontStyle: 'italic',
+    lineHeight: 20,
+  },
   setFormContent: {
     flex: 1,
-    paddingTop: 24,
+    paddingTop: 16,
     gap: 24,
   },
   inputContainer: {

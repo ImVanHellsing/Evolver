@@ -65,4 +65,17 @@ export const styles = StyleSheet.create({
     fontStyle: 'italic',
     color: '#555',
   },
+  editDescBtn: {
+    marginTop: 12,
+    alignSelf: 'flex-start',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+  },
+  editDescBtnText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#000',
+  }
 });

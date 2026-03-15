@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Text, View, Pressable, Modal, ScrollView, Alert } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 import { useAppRouteParams } from "@/hooks/useAppRouteParams";
 import { Header } from "@/components/Header";
@@ -11,6 +12,7 @@ import { SetType } from "@/models/SetType";
 import { getMuscleGroupTranslate, MuscleGroup } from "@/models/MuscleGroup";
 import { getDayOfWeekMessage } from "@/models/DayOfWeek";
 import { useWorkouts } from "./useWorkouts";
+import { routinesRepository } from "@/services/routines/routinesRepository";
 
 import { styles } from "./styles";
 
@@ -22,14 +24,34 @@ export const WorkoutScreen = () => {
   const { routine } = useAppRouteParams<'Workouts'>();
 
   const [isModalVisible, setModalVisible] = useState(false);
+  const [currentRoutine, setCurrentRoutine] = useState(routine);
+
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const refreshRoutine = async () => {
+        const updatedRoutine = await routinesRepository.getById(routine.id);
+        if (isActive && updatedRoutine) {
+          setCurrentRoutine(updatedRoutine);
+        }
+      };
+
+      refreshRoutine();
+
+      return () => {
+        isActive = false;
+      };
+    }, [routine.id])
+  );
 
   const { workoutsWithLastSession } = useWorkouts({
-    routineTemplateId: routine.id,
-    workouts: routine.workouts,
+    routineTemplateId: currentRoutine.id,
+    workouts: currentRoutine.workouts,
   });
 
   const onWorkoutPressed = (workout: WorkoutTemplate) => {
-    navigation.navigate(Routes.Exercises, { routineTemplateId: routine.id, workout });
+    navigation.navigate(Routes.Exercises, { routineTemplateId: currentRoutine.id, workout });
   }
 
   const onWorkoutLongPressed = (lastSession: import("@/models/Workout").WorkoutSession | null) => {
@@ -69,11 +91,11 @@ export const WorkoutScreen = () => {
         count
       }))
       .sort((a, b) => b.count - a.count);
-  }, [routine]);
+  }, [currentRoutine]);
 
   return (
     <View style={styles.container}>
-      <Header title={routine.name} showBackButton />
+      <Header title={currentRoutine.name} showBackButton />
       <View style={styles.innerContainer}>
         <Text style={styles.hint}>Pressione para ver os detalhes de um treino</Text>
         <Pressable style={styles.summaryButton} onPress={() => setModalVisible(true)}>

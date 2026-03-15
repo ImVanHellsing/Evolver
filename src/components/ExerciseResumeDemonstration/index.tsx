@@ -1,27 +1,28 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 
-import { Exercise } from '@/models/Exercise';
+import { ExerciseTemplate } from '@/models/Exercise';
 import { getFailureTypeMessage } from '@/models/FailureType';
 import { getMuscleGroupMessage } from '@/models/MuscleGroup';
-import { Set } from '@/models/Set';
+import { SetTemplate } from '@/models/Set';
 import { SetType } from '@/models/SetType';
 
 import { styles } from './styles';
 
 interface ExerciseResumeDemonstrationProps {
-  exercise: Exercise;
-  onPress: (exercise: Exercise) => void;
+  exercise: ExerciseTemplate;
+  onPress: (exercise: ExerciseTemplate) => void;
+  onEditDescription?: (exercise: ExerciseTemplate) => void;
 }
 
-export const ExerciseResumeDemonstration = ({ exercise, onPress }: ExerciseResumeDemonstrationProps) => {
+export const ExerciseResumeDemonstration = ({ exercise, onPress, onEditDescription }: ExerciseResumeDemonstrationProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
   };
 
-  const getExercisePersonalRecordText = (exercise: Exercise) => {
+  const getExercisePersonalRecordText = (exercise: ExerciseTemplate) => {
     if (!exercise.sets || exercise.sets.length === 0) return 'Sem séries';
     const lastSet = exercise.sets[exercise.sets.length - 1];
     const shouldShowPersonalRecord = lastSet && lastSet.weight && lastSet.reps
@@ -29,7 +30,7 @@ export const ExerciseResumeDemonstration = ({ exercise, onPress }: ExerciseResum
     return shouldShowPersonalRecord ? <Text style={styles.desc}>{personalRecordText}</Text> : null;
   };
 
-  const getAmountOfSetsText = (sets: Set[]) => {
+  const getAmountOfSetsText = (sets: SetTemplate[]) => {
     const validSetTypes = [SetType.TopSet, SetType.WorkSet];
     const validSets = sets.filter((set) => validSetTypes.includes(set.type));
     if (!validSets || validSets.length === 0) return '0 séries';
@@ -62,7 +63,19 @@ export const ExerciseResumeDemonstration = ({ exercise, onPress }: ExerciseResum
 
       {isExpanded && (
         <View style={styles.descriptionContainer}>
-          <Text style={styles.descriptionText}>{exercise.description}</Text>
+          {!!exercise.description && (
+            <Text style={styles.descriptionText}>{exercise.description}</Text>
+          )}
+          {onEditDescription && (
+            <Pressable style={styles.editDescBtn} onPress={(e) => {
+              e.stopPropagation();
+              onEditDescription(exercise);
+            }}>
+              <Text style={styles.editDescBtnText}>
+                {exercise.description ? 'Editar observação' : '+ Adicionar observação'}
+              </Text>
+            </Pressable>
+          )}
         </View>
       )}
     </Pressable>

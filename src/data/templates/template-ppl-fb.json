@@ -15,8 +15,7 @@
           "sets": [
             {
               "id": "ppl-push-e0-s0",
-              "type": "WarmUpSet",
-              "restTime": "NO_REST"
+              "type": "WarmUpSet"
             },
             {
               "id": "ppl-push-e0-s1",
@@ -43,7 +42,7 @@
           "sets": [
             {
               "id": "ppl-push-e1-s0",
-              "restTime": "SEG_60",
+              "restTime": "SEG_120",
               "type": "RampUpSet"
             },
             {
@@ -66,7 +65,7 @@
           "sets": [
             {
               "id": "ppl-push-e3-s0",
-              "restTime": "SEG_60",
+              "restTime": "SEG_120",
               "type": "RampUpSet"
             },
             {
@@ -84,7 +83,7 @@
           "sets": [
             {
               "id": "ppl-push-e4-s0",
-              "restTime": "SEG_60",
+              "restTime": "SEG_120",
               "type": "RampUpSet"
             },
             {
@@ -107,7 +106,7 @@
           "sets": [
             {
               "id": "ppl-push-e5-s0",
-              "restTime": "SEG_60",
+              "restTime": "SEG_120",
               "type": "RampUpSet"
             },
             {
@@ -135,12 +134,12 @@
             },
             {
               "id": "ppl-push-e6-s1",
-              "restTime": "SEG_120",
+              "restTime": "SEG_90",
               "type": "WorkSet"
             },
             {
               "id": "ppl-push-e6-s2",
-              "restTime": "SEG_180",
+              "restTime": "SEG_120",
               "type": "TopSet"
             }
           ]
@@ -153,8 +152,7 @@
           "sets": [
             {
               "id": "ppl-push-e7-s0",
-              "type": "WarmUpSet",
-              "restTime": "NO_REST"
+              "type": "WarmUpSet"
             },
             {
               "id": "ppl-push-e7-s1",
@@ -188,7 +186,6 @@
           "sets": [
             {
               "id": "ppl-pull-e0-s0",
-              "restTime": "NO_REST",
               "type": "WarmUpSet"
             },
             {
@@ -262,7 +259,7 @@
           "sets": [
             {
               "id": "ppl-pull-e3-s0",
-              "restTime": "SEG_60",
+              "restTime": "SEG_120",
               "type": "RampUpSet"
             },
             {
@@ -290,12 +287,12 @@
             },
             {
               "id": "ppl-pull-e4-s1",
-              "restTime": "SEG_120",
+              "restTime": "SEG_90",
               "type": "WorkSet"
             },
             {
               "id": "ppl-pull-e4-s2",
-              "restTime": "SEG_180",
+              "restTime": "SEG_120",
               "type": "TopSet"
             }
           ]
@@ -313,7 +310,7 @@
             },
             {
               "id": "ppl-pull-e5-s2",
-              "restTime": "SEG_180",
+              "restTime": "SEG_120",
               "type": "TopSet"
             }
           ]
@@ -326,12 +323,12 @@
           "sets": [
             {
               "id": "ppl-pull-e6-s1",
-              "restTime": "SEG_90",
+              "restTime": "SEG_60",
               "type": "WorkSet"
             },
             {
               "id": "ppl-pull-e6-s2",
-              "restTime": "SEG_90",
+              "restTime": "SEG_60",
               "type": "WorkSet"
             }
           ]
@@ -351,7 +348,6 @@
           "sets": [
             {
               "id": "ppl-legs-e0-s0",
-              "restTime": "NO_REST",
               "type": "WarmUpSet"
             },
             {
@@ -366,7 +362,7 @@
             },
             {
               "id": "ppl-legs-e0-s3",
-              "restTime": "SEG_120",
+              "restTime": "SEG_180",
               "type": "TopSet"
             }
           ]
@@ -379,7 +375,6 @@
           "sets": [
             {
               "id": "ppl-legs-e1-s0",
-              "restTime": "NO_REST",
               "type": "WarmUpSet"
             },
             {
@@ -452,9 +447,9 @@
         },
         {
           "id": "ppl-legs-e4",
-          "name": "Panturrilha em Pé Máquina",
+          "name": "Abdução Pélvica Máquina",
           "description": "Máquina da Medianeira",
-          "muscleGroup": "Calves",
+          "muscleGroup": "Glutes",
           "sets": [
             {
               "id": "ppl-legs-e4-s0",
@@ -463,7 +458,7 @@
             },
             {
               "id": "ppl-legs-e4-s1",
-              "restTime": "SEG_90",
+              "restTime": "SEG_60",
               "type": "WorkSet"
             },
             {
@@ -477,16 +472,16 @@
           "id": "ppl-legs-e5",
           "name": "Cadeira Adutora",
           "description": "Máquina da Medianeira",
-          "muscleGroup": "Quads",
+          "muscleGroup": "Adductors",
           "sets": [
             {
               "id": "ppl-legs-e5-s0",
-              "restTime": "NO_REST",
+              "restTime": "SEG_60",
               "type": "RampUpSet"
             },
             {
               "id": "ppl-legs-e5-s1",
-              "restTime": "SEG_60",
+              "restTime": "SEG_90",
               "type": "WorkSet"
             },
             {
@@ -498,19 +493,24 @@
         },
         {
           "id": "ppl-legs-e6",
-          "name": "Abdominal Infra na Torre",
-          "description": "",
-          "muscleGroup": "Core",
+          "name": "Panturrilha em Pé Máquina",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Calves",
           "sets": [
             {
               "id": "ppl-legs-e6-s0",
-              "restTime": "NO_REST",
-              "type": "WorkSet"
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
             },
             {
               "id": "ppl-legs-e6-s1",
-              "restTime": "SEG_60",
+              "restTime": "SEG_90",
               "type": "WorkSet"
+            },
+            {
+              "id": "ppl-legs-e6-s2",
+              "restTime": "SEG_120",
+              "type": "TopSet"
             }
           ]
         }
@@ -523,8 +523,8 @@
       "exercises": [
         {
           "id": "ppl-fb-e0",
-          "name": "Supino Inclinado Máquina",
-          "description": "Máquina da Medianeira",
+          "name": "Supino Inclinado com Halter",
+          "description": "",
           "muscleGroup": "Chest",
           "sets": [
             {
@@ -544,7 +544,7 @@
             },
             {
               "id": "ppl-fb-e0-s3",
-              "restTime": "SEG_120",
+              "restTime": "SEG_180",
               "type": "TopSet"
             }
           ]
@@ -572,7 +572,7 @@
             },
             {
               "id": "ppl-fb-e1-s3",
-              "restTime": "SEG_120",
+              "restTime": "SEG_180",
               "type": "TopSet"
             }
           ]
@@ -584,22 +584,21 @@
           "muscleGroup": "Quads",
           "sets": [
             {
-              "id": "ppl-fb-e3-s0",
-              "restTime": "NO_REST",
+              "id": "ppl-fb-e2-s0",
               "type": "WarmUpSet"
             },
             {
-              "id": "ppl-fb-e3-s1",
+              "id": "ppl-fb-e2-s1",
               "restTime": "SEG_60",
               "type": "RampUpSet"
             },
             {
-              "id": "ppl-fb-e3-s2",
+              "id": "ppl-fb-e2-s2",
               "restTime": "SEG_120",
               "type": "WorkSet"
             },
             {
-              "id": "ppl-fb-e3-s3",
+              "id": "ppl-fb-e2-s3",
               "restTime": "SEG_180",
               "type": "TopSet"
             }
@@ -607,37 +606,55 @@
         },
         {
           "id": "ppl-fb-e3",
-          "name": "Abdução Pélvica Máquina",
-          "description": "Máquina da Medianeira",
-          "muscleGroup": "Glutes",
+          "name": "Rosca Martelo Alternada Halter",
+          "description": "",
+          "muscleGroup": "Biceps",
           "sets": [
             {
-              "id": "ppl-fb-e4-s0",
-              "restTime": "NO_REST",
-              "type": "WarmUpSet"
-            },
-            {
-              "id": "ppl-fb-e4-s1",
+              "id": "ppl-fb-e3-s0",
               "restTime": "SEG_60",
               "type": "RampUpSet"
             },
             {
-              "id": "ppl-fb-e4-s2",
-              "restTime": "SEG_120",
+              "id": "ppl-fb-e3-s1",
+              "restTime": "SEG_90",
               "type": "WorkSet"
             },
             {
-              "id": "ppl-fb-e4-s3",
-              "restTime": "SEG_180",
+              "id": "ppl-fb-e3-s2",
+              "restTime": "SEG_120",
               "type": "TopSet"
             }
           ]
         },
         {
           "id": "ppl-fb-e4",
-          "name": "Rosca Martelo Alternada Halter",
-          "description": "",
-          "muscleGroup": "Biceps",
+          "name": "Triceps Testa Polia",
+          "description": "Polia da Medianeira",
+          "muscleGroup": "Triceps",
+          "sets": [
+            {
+              "id": "ppl-fb-e4-s0",
+              "restTime": "SEG_60",
+              "type": "RampUpSet"
+            },
+            {
+              "id": "ppl-fb-e4-s1",
+              "restTime": "SEG_90",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-fb-e4-s2",
+              "restTime": "SEG_120",
+              "type": "TopSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-fb-e5",
+          "name": "Elevação Lateral Polia",
+          "description": "Polia da Vincent, altura média",
+          "muscleGroup": "Shoulders",
           "sets": [
             {
               "id": "ppl-fb-e5-s0",
@@ -648,69 +665,23 @@
               "id": "ppl-fb-e5-s1",
               "restTime": "SEG_120",
               "type": "WorkSet"
-            },
-            {
-              "id": "ppl-fb-e5-s2",
-              "restTime": "SEG_120",
-              "type": "TopSet"
-            }
-          ]
-        },
-        {
-          "id": "ppl-fb-e5",
-          "name": "Triceps Testa Polia",
-          "description": "Polia da Medianeira",
-          "muscleGroup": "Triceps",
-          "sets": [
-            {
-              "id": "ppl-fb-e6-s0",
-              "restTime": "SEG_60",
-              "type": "RampUpSet"
-            },
-            {
-              "id": "ppl-fb-e6-s1",
-              "restTime": "SEG_120",
-              "type": "WorkSet"
-            },
-            {
-              "id": "ppl-fb-e6-s2",
-              "restTime": "SEG_120",
-              "type": "TopSet"
             }
           ]
         },
         {
           "id": "ppl-fb-e6",
-          "name": "Elevação Lateral Polia",
-          "description": "Polia da Vincent, altura média",
-          "muscleGroup": "Shoulders",
+          "name": "Abdominal Infra na Torre",
+          "description": "",
+          "muscleGroup": "Core",
           "sets": [
             {
-              "id": "ppl-fb-e7-s0",
+              "id": "ppl-fb-e6-s0",
               "restTime": "SEG_60",
-              "type": "RampUpSet"
-            },
-            {
-              "id": "ppl-fb-e7-s1",
-              "restTime": "SEG_120",
               "type": "WorkSet"
-            }
-          ]
-        },
-        {
-          "id": "ppl-fb-e7",
-          "name": "Posterior Polia Unilateral",
-          "description": "Polia da Medianeira",
-          "muscleGroup": "Shoulders",
-          "sets": [
-            {
-              "id": "ppl-fb-e8-s0",
-              "restTime": "SEG_60",
-              "type": "RampUpSet"
             },
             {
-              "id": "ppl-fb-e8-s1",
-              "restTime": "SEG_120",
+              "id": "ppl-fb-e6-s1",
+              "restTime": "SEG_60",
               "type": "WorkSet"
             }
           ]
