@@ -9,6 +9,7 @@ import { getSetTypeMessage } from '@/models/SetType';
 import { FailureType, FailureTypeMessage } from '@/models/FailureType';
 import { ConfirmationModal } from '@/components/ConfirmationModal';
 import { FinishWorkoutModal } from '@/components/FinishWorkoutModal';
+import { EditDescriptionModal } from '@/components/EditDescriptionModal';
 
 import { styles } from './styles';
 
@@ -42,6 +43,12 @@ export const WorkoutRunnerScreen = () => {
     skipRest,
     duration,
     setDuration,
+    isEditDescriptionModalVisible,
+    onEditDescriptionPressed,
+    handleSaveDescription,
+    onCancelEditDescription,
+    previousPerformance,
+    personalRecord,
   } = useWorkoutRunner(routineTemplateId, workout);
 
   return (
@@ -71,11 +78,35 @@ export const WorkoutRunnerScreen = () => {
 
         </View>
 
-        {!!currentExercise.description && (
-          <View style={styles.exerciseDescriptionContainer}>
-            <Text style={styles.exerciseDescriptionText}>{currentExercise.description}</Text>
+        {(previousPerformance || personalRecord) && (
+          <View style={styles.performanceContainer}>
+            {previousPerformance && (
+              <View style={styles.performanceItem}>
+                <Text style={styles.performanceLabel}>Anterior</Text>
+                <Text style={styles.performanceValue}>
+                  {previousPerformance.weight}kg x {previousPerformance.reps} {previousPerformance.failureType ? `(${FailureTypeMessage[previousPerformance.failureType]})` : ''}
+                </Text>
+              </View>
+            )}
+            {personalRecord && (
+              <View style={styles.performanceItem}>
+                <Text style={styles.performanceLabel}>PR</Text>
+                <Text style={styles.performanceValue}>{personalRecord.weight}kg x {personalRecord.reps}</Text>
+              </View>
+            )}
           </View>
         )}
+
+        <Pressable 
+          style={styles.exerciseDescriptionContainer}
+          onPress={onEditDescriptionPressed}
+        >
+          {currentExercise.description ? (
+            <Text style={styles.exerciseDescriptionText}>{currentExercise.description}</Text>
+          ) : (
+            <Text style={styles.addDescriptionText}>+ Adicionar observação</Text>
+          )}
+        </Pressable>
 
         <View style={styles.divider} />
 
@@ -187,6 +218,13 @@ export const WorkoutRunnerScreen = () => {
           </Pressable>
         </View>
       )}
+
+      <EditDescriptionModal
+        visible={isEditDescriptionModalVisible}
+        initialDescription={currentExercise.description || ''}
+        onSave={handleSaveDescription}
+        onCancel={onCancelEditDescription}
+      />
     </KeyboardAvoidingView>
   );
 }

@@ -49,10 +49,10 @@ export function HistoryScreen() {
         onPress={() => navigation.navigate(Routes.WorkoutSessionDetail, { session: item })}
       >
         <View style={styles.cardHeader}>
-          <Text style={styles.routineName}>{item.routineName}</Text>
+          <Text style={styles.dayOfWeek}>{dayName}</Text>
           <Text style={styles.dateText}>{formattedDate}</Text>
         </View>
-        <Text style={styles.dayOfWeek}>{dayName}</Text>
+        <Text style={styles.routineName}>{item.routineName}</Text>
 
         {(durationText || item.caloriesEstimated) && (
           <View style={styles.sessionInfoContainer}>

@@ -12,6 +12,13 @@ export const FailureTypeMessage: Record<FailureType, string> = {
   [FailureType.REMAINING_REPS]: 'Sobrando',
 }
 
+export const FAILURE_TYPE_PRIORITY: Record<FailureType, number> = {
+  [FailureType.FAILURE]: 0,
+  [FailureType.ZERO_RESERVED]: 1,
+  [FailureType.ONE_RESERVED]: 2,
+  [FailureType.REMAINING_REPS]: 3,
+};
+
 export function getFailureTypeMessage(status?: FailureType) {
   if (!status) return ''
   return FailureTypeMessage[status]

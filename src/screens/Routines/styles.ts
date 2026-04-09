@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#fff',
+		backgroundColor: '#F5F5F7',
 	},
 	innerContainer: {
 		flex: 1,
@@ -13,26 +13,30 @@ export const styles = StyleSheet.create({
 		fontSize: 28,
 		fontWeight: '700',
 		marginBottom: 16,
-		color: '#000',
+		color: '#1C1C1E',
 	},
 	bigButton: {
-		borderWidth: 1,
-		borderRadius: 16,
+		backgroundColor: '#FFF',
+		borderRadius: 12,
 		padding: 16,
 		minHeight: 96,
 		justifyContent: 'center',
-		marginBottom: 16,
+		marginBottom: 12,
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.05,
+		shadowRadius: 4,
+		elevation: 2,
 	},
 	bigButtonTitle: {
 		fontSize: 18,
-		fontWeight: '700',
+		fontWeight: '600',
 		marginBottom: 4,
-		color: '#000',
+		color: '#1C1C1E',
 	},
 	bigButtonDesc: {
-		fontSize: 13,
-		opacity: 0.8,
-		color: '#000',
+		fontSize: 14,
+		color: '#8E8E93',
 	},
 	fab: {
 		position: 'absolute',

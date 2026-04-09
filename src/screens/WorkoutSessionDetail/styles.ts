@@ -154,5 +154,23 @@ export const styles = StyleSheet.create({
   footerDate: {
     fontSize: 12,
     color: '#AEAEB2',
-  }
+  },
+  progressButton: {
+    backgroundColor: '#007AFF',
+    marginHorizontal: 16,
+    marginBottom: 20,
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    shadowColor: '#007AFF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  progressButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });

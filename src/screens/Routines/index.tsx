@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Pressable, Alert } from 'react-native';
+import { View, Text, Pressable, Alert, ScrollView } from 'react-native';
 
 import { Header } from '@/components/Header';
 import { RoutineTemplate } from '@/models/Routine';
@@ -26,14 +26,18 @@ export const RoutinesScreen = () => {
 	return (
 		<View style={styles.container}>
 			<Header title="Minhas Rotinas" showBackButton />
-			<View style={styles.innerContainer}>
+			<ScrollView 
+				style={styles.innerContainer} 
+				contentContainerStyle={{ paddingBottom: 80 }}
+				showsVerticalScrollIndicator={false}
+			>
 				{routines.map((routine) => (
 					<Pressable key={routine.id} style={styles.bigButton} onPress={() => onRoutinePressed(routine)}>
 						<Text style={styles.bigButtonTitle}>{routine.name}</Text>
 						<Text style={styles.bigButtonDesc}>{isRoutineStartedText(routine.id, sessions)}</Text>
 					</Pressable>
 				))}
-			</View>
+			</ScrollView>
 			<Pressable style={styles.fab} onPress={onAddRoutinePressed}>
 				<Text style={styles.fabIcon}>+</Text>
 			</Pressable>

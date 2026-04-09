@@ -27,14 +27,14 @@ export const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
-    color: '#000',
+    color: '#1C1C1E',
     textAlignVertical: 'center',
   },
   subtitle: {
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 8,
-    color: '#000',
+    color: '#1C1C1E',
     textAlignVertical: 'center',
   },
   closeButton: {

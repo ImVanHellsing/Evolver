@@ -9,6 +9,7 @@ export const Routes = {
 	Exercises: 'Exercises',
 	WorkoutRunner: 'WorkoutRunner',
 	WorkoutSessionDetail: 'WorkoutSessionDetail',
+	WorkoutProgress: 'WorkoutProgress',
 } as const
 
 export type RouteName = typeof Routes[keyof typeof Routes];
@@ -28,6 +29,9 @@ export type RootStackParamList = {
 		resume?: boolean
 	};
 	[Routes.WorkoutSessionDetail]: {
+		session: import("@/models/Workout").WorkoutSession
+	};
+	[Routes.WorkoutProgress]: {
 		session: import("@/models/Workout").WorkoutSession
 	};
 }

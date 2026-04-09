@@ -579,14 +579,10 @@
         },
         {
           "id": "ppl-fb-e2",
-          "name": "Agachamento Pendular",
+          "name": "Iso Lat Pulldown Máquina",
           "description": "Máquina da Medianeira",
-          "muscleGroup": "Quads",
+          "muscleGroup": "Back",
           "sets": [
-            {
-              "id": "ppl-fb-e2-s0",
-              "type": "WarmUpSet"
-            },
             {
               "id": "ppl-fb-e2-s1",
               "restTime": "SEG_60",
@@ -594,44 +590,48 @@
             },
             {
               "id": "ppl-fb-e2-s2",
-              "restTime": "SEG_120",
+              "restTime": "SEG_90",
               "type": "WorkSet"
             },
             {
               "id": "ppl-fb-e2-s3",
-              "restTime": "SEG_180",
+              "restTime": "SEG_120",
               "type": "TopSet"
             }
           ]
         },
         {
           "id": "ppl-fb-e3",
-          "name": "Rosca Martelo Alternada Halter",
-          "description": "",
-          "muscleGroup": "Biceps",
+          "name": "Agachamento Pendular",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Quads",
           "sets": [
             {
               "id": "ppl-fb-e3-s0",
+              "type": "WarmUpSet"
+            },
+            {
+              "id": "ppl-fb-e3-s1",
               "restTime": "SEG_60",
               "type": "RampUpSet"
             },
             {
-              "id": "ppl-fb-e3-s1",
-              "restTime": "SEG_90",
+              "id": "ppl-fb-e3-s2",
+              "restTime": "SEG_120",
               "type": "WorkSet"
             },
             {
-              "id": "ppl-fb-e3-s2",
-              "restTime": "SEG_120",
+              "id": "ppl-fb-e3-s3",
+              "restTime": "SEG_180",
               "type": "TopSet"
             }
           ]
         },
         {
           "id": "ppl-fb-e4",
-          "name": "Triceps Testa Polia",
-          "description": "Polia da Medianeira",
-          "muscleGroup": "Triceps",
+          "name": "Rosca Martelo Alternada Halter",
+          "description": "",
+          "muscleGroup": "Biceps",
           "sets": [
             {
               "id": "ppl-fb-e4-s0",
@@ -652,9 +652,9 @@
         },
         {
           "id": "ppl-fb-e5",
-          "name": "Elevação Lateral Polia",
-          "description": "Polia da Vincent, altura média",
-          "muscleGroup": "Shoulders",
+          "name": "Triceps Testa Polia",
+          "description": "Polia da Medianeira",
+          "muscleGroup": "Triceps",
           "sets": [
             {
               "id": "ppl-fb-e5-s0",
@@ -663,16 +663,21 @@
             },
             {
               "id": "ppl-fb-e5-s1",
-              "restTime": "SEG_120",
+              "restTime": "SEG_90",
               "type": "WorkSet"
+            },
+            {
+              "id": "ppl-fb-e5-s2",
+              "restTime": "SEG_120",
+              "type": "TopSet"
             }
           ]
         },
         {
           "id": "ppl-fb-e6",
-          "name": "Abdominal Infra na Torre",
-          "description": "",
-          "muscleGroup": "Core",
+          "name": "Elevação Lateral Polia",
+          "description": "Polia da Vincent, altura média",
+          "muscleGroup": "Shoulders",
           "sets": [
             {
               "id": "ppl-fb-e6-s0",
@@ -681,6 +686,24 @@
             },
             {
               "id": "ppl-fb-e6-s1",
+              "restTime": "SEG_90",
+              "type": "WorkSet"
+            }
+          ]
+        },
+        {
+          "id": "ppl-fb-e7",
+          "name": "Abdominal Infra na Torre",
+          "description": "",
+          "muscleGroup": "Core",
+          "sets": [
+            {
+              "id": "ppl-fb-e7-s0",
+              "restTime": "SEG_60",
+              "type": "WorkSet"
+            },
+            {
+              "id": "ppl-fb-e7-s1",
               "restTime": "SEG_60",
               "type": "WorkSet"
             }

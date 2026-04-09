@@ -5,3 +5,4 @@ export * from './Workouts';
 export * from './Exercises';
 export * from './WorkoutRunner';
 export * from './WorkoutSessionDetail';
+export * from './WorkoutProgress';

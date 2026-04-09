@@ -1,7 +1,7 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import { HomeScreen, HistoryScreen, RoutinesScreen, WorkoutScreen, ExercisesScreen, WorkoutRunnerScreen, WorkoutSessionDetailScreen } from '../../screens';
+import { HomeScreen, HistoryScreen, RoutinesScreen, WorkoutScreen, ExercisesScreen, WorkoutRunnerScreen, WorkoutSessionDetailScreen, WorkoutProgressScreen } from '../../screens';
 import { RootStackParamList, Routes } from './routes';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -39,6 +39,10 @@ export function AppNavigator() {
 			<Stack.Screen
 				name={Routes.WorkoutSessionDetail}
 				component={WorkoutSessionDetailScreen}
+			/>
+			<Stack.Screen
+				name={Routes.WorkoutProgress}
+				component={WorkoutProgressScreen}
 			/>
 		</Stack.Navigator>
 	);

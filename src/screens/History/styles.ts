@@ -26,18 +26,18 @@ export const styles = StyleSheet.create({
     marginBottom: 4,
   },
   routineName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1C1C1E',
+    fontSize: 14,
+    color: '#48484A',
+    textTransform: 'capitalize',
   },
   dateText: {
     fontSize: 14,
     color: '#8E8E93',
   },
   dayOfWeek: {
-    fontSize: 14,
-    color: '#48484A',
-    textTransform: 'capitalize',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1C1C1E',
   },
   centered: {
     flex: 1,

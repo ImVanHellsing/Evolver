@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Vibration } from 'react-native';
+import { Vibration, Alert } from 'react-native';
 
 import { useAppNavigation } from '@/hooks/useAppNavigation';
 import { useAppRouteParams } from '@/hooks/useAppRouteParams';
@@ -11,6 +11,7 @@ import { FailureType } from '@/models/FailureType';
 import { workoutSessionsRepository } from '@/services/workouts/workoutSessionsRepository';
 import { activeWorkoutSessionRepository } from '@/services/workouts/activeWorkoutSessionRepository';
 import { getRestTimeTypeSeconds } from '@/models/RestTimeType';
+import { routinesRepository } from '@/services/routines/routinesRepository';
 
 export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemplate) => {
   const navigation = useAppNavigation();
@@ -21,7 +22,9 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [currentSetIndex, setCurrentSetIndex] = useState(0);
 
-  const currentExercise = workout.exercises[currentExerciseIndex];
+  const [currentWorkout, setCurrentWorkout] = useState<WorkoutTemplate>(workout);
+
+  const currentExercise = currentWorkout.exercises[currentExerciseIndex];
   const currentSet = currentExercise.sets[currentSetIndex];
 
   const [weight, setWeight] = useState('');
@@ -30,6 +33,7 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
   const [failureType, setFailureType] = useState<FailureType>(FailureType.REMAINING_REPS);
   const [isExitModalVisible, setIsExitModalVisible] = useState<any>(null);
   const [isFinishModalVisible, setIsFinishModalVisible] = useState(false);
+  const [isEditDescriptionModalVisible, setIsEditDescriptionModalVisible] = useState(false);
 
   const [duration, setDuration] = useState('');
   const [calories, setCalories] = useState('');
@@ -37,6 +41,9 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
   const [isResting, setIsResting] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [timerEndTime, setTimerEndTime] = useState<number | null>(null);
+
+  const [previousPerformance, setPreviousPerformance] = useState<{ weight: number; reps: number; failureType: FailureType } | null>(null);
+  const [personalRecord, setPersonalRecord] = useState<{ weight: number; reps: number } | null>(null);
 
   const [savedWorkoutSession, setSavedWorkoutSession] = useState<WorkoutSession>({
     id: `workout-sessions-${new Date().toISOString()}`,
@@ -95,8 +102,66 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     isResting, 
     timerEndTime,
     routineTemplateId,
-    workout
+    workout,
+    currentExercise.id,
+    currentSetIndex
   ]);
+
+  // FETCH HISTORICAL DATA
+  useEffect(() => {
+    const fetchHistory = async () => {
+      const allSessions = await workoutSessionsRepository.list();
+      
+      // Sort by date desc
+      const sortedSessions = allSessions.sort((a, b) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+
+      // Previous performance: same exercise, same set index, last occurrence
+      const lastSessionWithExercise = sortedSessions.find(session => 
+        session.exercises.some(ex => ex.exerciseTemplateId === currentExercise.id)
+      );
+
+      if (lastSessionWithExercise) {
+        const exerciseLog = lastSessionWithExercise.exercises.find(
+          ex => ex.exerciseTemplateId === currentExercise.id
+        );
+        if (exerciseLog && exerciseLog.sets[currentSetIndex]) {
+          const setLog = exerciseLog.sets[currentSetIndex];
+          setPreviousPerformance({ weight: setLog.weight, reps: setLog.reps, failureType: setLog.failureType });
+        } else {
+          setPreviousPerformance(null);
+        }
+      } else {
+        setPreviousPerformance(null);
+      }
+
+      // Personal Record: highest weight lifted for this exercise across all sessions
+      let maxWeight = 0;
+      let maxReps = 0;
+
+      allSessions.forEach(session => {
+        session.exercises.forEach(ex => {
+          if (ex.exerciseTemplateId === currentExercise.id) {
+            ex.sets.forEach(set => {
+              if (set.weight > maxWeight || (set.weight === maxWeight && set.reps > maxReps)) {
+                maxWeight = set.weight;
+                maxReps = set.reps;
+              }
+            });
+          }
+        });
+      });
+
+      if (maxWeight > 0) {
+        setPersonalRecord({ weight: maxWeight, reps: maxReps });
+      } else {
+        setPersonalRecord(null);
+      }
+    };
+
+    fetchHistory();
+  }, [currentExercise.id, currentSetIndex]);
 
   const clearSetForm = () => {
     setWeight('');
@@ -201,6 +266,35 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     setIsExitModalVisible(false);
   }
 
+  const onEditDescriptionPressed = () => {
+    setIsEditDescriptionModalVisible(true);
+  }
+
+  const handleSaveDescription = async (newDescription: string) => {
+    try {
+      const routine = await routinesRepository.getById(routineTemplateId);
+      if (!routine) return;
+
+      const workoutIndex = routine.workouts.findIndex(w => w.id === currentWorkout.id);
+      if (workoutIndex === -1) return;
+
+      const exerciseIndex = routine.workouts[workoutIndex].exercises.findIndex(e => e.id === currentExercise.id);
+      if (exerciseIndex === -1) return;
+
+      // Update the description in repository
+      routine.workouts[workoutIndex].exercises[exerciseIndex].description = newDescription;
+      await routinesRepository.save(routine);
+
+      // Update local state to reflect changes instantly
+      setCurrentWorkout(routine.workouts[workoutIndex]);
+
+      setIsEditDescriptionModalVisible(false);
+    } catch (error) {
+      console.error('Error saving description:', error);
+      Alert.alert('Erro', 'Ocorreu um problema ao tentar salvar a observação.');
+    }
+  }
+
   const onFinishWorkout = async () => {
     const finalWorkoutSession: WorkoutSession = {
       ...savedWorkoutSession,
@@ -300,6 +394,12 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     onFinishWorkout,
     isResting,
     secondsLeft,
-    skipRest
+    skipRest,
+    isEditDescriptionModalVisible,
+    onEditDescriptionPressed,
+    handleSaveDescription,
+    onCancelEditDescription: () => setIsEditDescriptionModalVisible(false),
+    previousPerformance,
+    personalRecord,
   };
 }

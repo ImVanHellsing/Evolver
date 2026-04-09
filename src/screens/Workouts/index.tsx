@@ -123,7 +123,7 @@ export const WorkoutScreen = () => {
                   </Text>
 
                   {!!lastSession.duration && (
-                    <Text style={styles.bigButtonDesc}>Duração: {Math.round(lastSession.duration / 60)} min</Text>
+                    <Text style={styles.bigButtonDesc}>Duração: {Math.round(lastSession.duration)} min</Text>
                   )}
 
                   {typeof lastSession.caloriesEstimated === 'number' && (

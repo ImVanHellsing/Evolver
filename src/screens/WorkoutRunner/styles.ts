@@ -51,6 +51,30 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: '#000',
+    marginBottom: 16,
+  },
+  performanceContainer: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 16,
+  },
+  performanceItem: {
+    flex: 1,
+    backgroundColor: '#000',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  performanceLabel: {
+    fontSize: 10,
+    color: '#aaa',
+    textTransform: 'uppercase',
+    fontWeight: 'bold',
+  },
+  performanceValue: {
+    fontSize: 14,
+    color: '#fff',
+    fontWeight: 'bold',
   },
   exerciseDescriptionContainer: {
     backgroundColor: '#f5f5f5',
@@ -65,6 +89,11 @@ export const styles = StyleSheet.create({
     color: '#333',
     fontStyle: 'italic',
     lineHeight: 20,
+  },
+  addDescriptionText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
   },
   setFormContent: {
     flex: 1,

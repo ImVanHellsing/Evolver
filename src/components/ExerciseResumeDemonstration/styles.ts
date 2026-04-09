@@ -2,11 +2,15 @@ import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
   pressableContainer: {
-    borderWidth: 1,
-    borderRadius: 16,
+    backgroundColor: '#FFF',
+    borderRadius: 12,
     padding: 16,
-    marginBottom: 16,
-    backgroundColor: '#fff',
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   topRow: {
     flexDirection: 'row',
@@ -24,14 +28,14 @@ export const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '600',
     marginBottom: 4,
-    color: '#000',
+    color: '#1C1C1E',
   },
   desc: {
-    fontSize: 13,
-    opacity: 0.8,
-    color: '#000',
+    fontSize: 14,
+    color: '#8E8E93',
+    marginBottom: 2,
   },
   muscleBadge: {
     backgroundColor: '#000',

@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#F5F5F7',
   },
   innerContainer: {
     flex: 1,
@@ -18,11 +18,11 @@ export const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     marginBottom: 16,
-    color: '#000',
+    color: '#1C1C1E',
   },
   hint: {
     fontSize: 16,
-    color: '#666',
+    color: '#8E8E93',
     marginBottom: 16,
   },
   bigButton: {

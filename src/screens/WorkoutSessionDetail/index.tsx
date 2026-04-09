@@ -7,6 +7,8 @@ import { routinesRepository } from "@/services/routines/routinesRepository";
 import { RoutineTemplate } from "@/models/Routine";
 import { ExerciseLog } from "@/models/Exercise";
 import { getFailureTypeMessage } from "@/models/FailureType";
+import { useAppNavigation } from "@/hooks/useAppNavigation";
+import { Routes } from "@/app/navigation/routes";
 
 import { styles } from "./styles";
 
@@ -66,6 +68,7 @@ const ExerciseItem = ({ exercise, exerciseName }: ExerciseItemProps) => {
 };
 
 export const WorkoutSessionDetailScreen = () => {
+  const navigation = useAppNavigation();
   const { session } = useAppRouteParams<'WorkoutSessionDetail'>();
   const [routine, setRoutine] = useState<RoutineTemplate | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -133,6 +136,13 @@ export const WorkoutSessionDetailScreen = () => {
           </Text>
         </View>
       </View>
+
+      <Pressable
+        style={styles.progressButton}
+        onPress={() => navigation.navigate(Routes.WorkoutProgress, { session })}
+      >
+        <Text style={styles.progressButtonText}>Visualizar Progressão</Text>
+      </Pressable>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.sectionTitle}>Relatório de Exercícios</Text>
