@@ -11,7 +11,7 @@ export default function App() {
   const isDarkMode = useColorScheme() === 'dark';
 
   useEffect(() => {
-    routinesRepository.seedIfEmpty(routineTemplates);
+    routinesRepository.syncTemplates(routineTemplates);
   }, []);
 
   return (

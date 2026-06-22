@@ -8,6 +8,19 @@ export const styles = StyleSheet.create({
   listContent: {
     padding: 16,
   },
+  sectionHeader: {
+    paddingTop: 16,
+    paddingBottom: 8,
+    paddingHorizontal: 4,
+    backgroundColor: '#F5F5F7',
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#666',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
   card: {
     backgroundColor: '#FFF',
     borderRadius: 12,
@@ -26,18 +39,13 @@ export const styles = StyleSheet.create({
     marginBottom: 4,
   },
   routineName: {
-    fontSize: 14,
-    color: '#48484A',
-    textTransform: 'capitalize',
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#1C1C1E',
   },
   dateText: {
     fontSize: 14,
     color: '#8E8E93',
-  },
-  dayOfWeek: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1C1C1E',
   },
   centered: {
     flex: 1,

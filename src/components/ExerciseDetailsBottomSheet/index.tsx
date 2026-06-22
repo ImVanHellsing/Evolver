@@ -1,14 +1,14 @@
 import React from 'react';
 import { Modal, View, Text, TouchableWithoutFeedback, ScrollView } from 'react-native';
 
-import { Exercise } from '@/models/Exercise';
+import { ExerciseTemplate } from '@/models/Exercise';
 import { getMuscleGroupMessage } from '@/models/MuscleGroup';
 import { getSetTypeMessage, } from '@/models/SetType';
 
 import { styles } from './styles';
 
 interface ExerciseDetailsBottomSheetProps {
-  exercise: Exercise;
+  exercise: ExerciseTemplate;
   isVisible: boolean;
   onClose: () => void;
 }
@@ -28,9 +28,16 @@ export const ExerciseDetailsBottomSheet = ({
   };
 
   const renderSets = () => {
+    const sets = exercise.sets || [];
+    if (sets.length === 0) {
+      return <>
+        <Text style={styles.subtitle}>Séries</Text>
+        <Text style={{ fontSize: 14, color: '#666' }}>Séries livres (dinâmicas)</Text>
+      </>
+    }
     return <>
       <Text style={styles.subtitle}>Séries</Text>
-      {exercise.sets.map((set, index) => (
+      {sets.map((set, index) => (
         <View key={index}>
           <Text>1 x {getSetTypeMessage(set.type)}</Text>
         </View>

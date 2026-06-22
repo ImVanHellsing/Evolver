@@ -10,8 +10,8 @@ import { SetLog } from '@/models/Set';
 import { FailureType } from '@/models/FailureType';
 import { workoutSessionsRepository } from '@/services/workouts/workoutSessionsRepository';
 import { activeWorkoutSessionRepository } from '@/services/workouts/activeWorkoutSessionRepository';
-import { getRestTimeTypeSeconds } from '@/models/RestTimeType';
 import { routinesRepository } from '@/services/routines/routinesRepository';
+import { getIntelligentRestTime } from '@/utils/timerUtils';
 
 export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemplate) => {
   const navigation = useAppNavigation();
@@ -20,19 +20,22 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
   const hasRestoredSessionRef = useRef(false);
 
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
-  const [currentSetIndex, setCurrentSetIndex] = useState(0);
-
   const [currentWorkout, setCurrentWorkout] = useState<WorkoutTemplate>(workout);
 
   const currentExercise = currentWorkout.exercises[currentExerciseIndex];
-  const currentSet = currentExercise.sets[currentSetIndex];
+
+  // Evolver 2.0: selected set type to log
+  const [selectedSetType, setSelectedSetType] = useState<SetType>(SetType.WarmUpSet);
 
   const [weight, setWeight] = useState('');
   const [reps, setReps] = useState('');
   const [observation, setObservation] = useState('');
   const [failureType, setFailureType] = useState<FailureType>(FailureType.REMAINING_REPS);
   const [isExitModalVisible, setIsExitModalVisible] = useState<any>(null);
+  
+  // Finish workout flow
   const [isFinishModalVisible, setIsFinishModalVisible] = useState(false);
+  const [isMissingModalVisible, setIsMissingModalVisible] = useState(false);
   const [isEditDescriptionModalVisible, setIsEditDescriptionModalVisible] = useState(false);
 
   const [duration, setDuration] = useState('');
@@ -45,6 +48,9 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
   const [previousPerformance, setPreviousPerformance] = useState<{ weight: number; reps: number; failureType: FailureType } | null>(null);
   const [personalRecord, setPersonalRecord] = useState<{ weight: number; reps: number } | null>(null);
 
+  // Evolver 2.0: Tracking skipped exercises explicitly
+  const [skippedExerciseIds, setSkippedExerciseIds] = useState<string[]>([]);
+
   const [savedWorkoutSession, setSavedWorkoutSession] = useState<WorkoutSession>({
     id: `workout-sessions-${new Date().toISOString()}`,
     routineTemplateId: routineTemplateId,
@@ -52,6 +58,32 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     date: new Date(),
     exercises: [],
   });
+
+  const loggedSetsForCurrentExercise = savedWorkoutSession.exercises.find(
+    ex => ex.exerciseTemplateId === currentExercise.id
+  )?.sets || [];
+
+  // Suggest next set type automatically based on current logged sets
+  const suggestNextSetType = (loggedSets: SetLog[]) => {
+    if (loggedSets.length === 0) {
+      setSelectedSetType(SetType.WarmUpSet);
+      return;
+    }
+    const lastSet = loggedSets[loggedSets.length - 1];
+    if (lastSet.type === SetType.WarmUpSet) {
+      const warmupCount = loggedSets.filter(s => s.type === SetType.WarmUpSet).length;
+      setSelectedSetType(warmupCount >= 2 ? SetType.RampUpSet : SetType.WarmUpSet);
+    } else if (lastSet.type === SetType.RampUpSet) {
+      setSelectedSetType(SetType.WorkSet);
+    } else if (lastSet.type === SetType.WorkSet) {
+      const workCount = loggedSets.filter(s => s.type === SetType.WorkSet).length;
+      setSelectedSetType(workCount >= 2 ? SetType.TopSet : SetType.WorkSet);
+    } else if (lastSet.type === SetType.TopSet) {
+      setSelectedSetType(SetType.BackoffSet);
+    } else if (lastSet.type === SetType.BackoffSet) {
+      setSelectedSetType(SetType.BackoffSet);
+    }
+  };
 
   // RESTORE SESSION
   useEffect(() => {
@@ -61,12 +93,18 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
         if (savedData) {
           setSavedWorkoutSession(savedData.savedWorkoutSession);
           setCurrentExerciseIndex(savedData.currentExerciseIndex);
-          setCurrentSetIndex(savedData.currentSetIndex);
           setWeight(savedData.weight);
           setReps(savedData.reps);
           setObservation(savedData.observation);
           setIsResting(savedData.isResting);
           setTimerEndTime(savedData.timerEndTime);
+          
+          if ((savedData as any).skippedExerciseIds) {
+            setSkippedExerciseIds((savedData as any).skippedExerciseIds);
+          }
+          if ((savedData as any).selectedSetType) {
+            setSelectedSetType((savedData as any).selectedSetType);
+          }
         }
         hasRestoredSessionRef.current = true;
       };
@@ -84,18 +122,19 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
         workout,
         savedWorkoutSession,
         currentExerciseIndex,
-        currentSetIndex,
+        currentSetIndex: loggedSetsForCurrentExercise.length,
         weight,
         reps,
         observation,
         isResting,
-        timerEndTime
-      });
+        timerEndTime,
+        skippedExerciseIds,
+        selectedSetType
+      } as any);
     }
   }, [
     savedWorkoutSession, 
     currentExerciseIndex, 
-    currentSetIndex, 
     weight, 
     reps, 
     observation, 
@@ -103,8 +142,9 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     timerEndTime,
     routineTemplateId,
     workout,
-    currentExercise.id,
-    currentSetIndex
+    skippedExerciseIds,
+    selectedSetType,
+    loggedSetsForCurrentExercise.length
   ]);
 
   // FETCH HISTORICAL DATA
@@ -117,7 +157,7 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
         new Date(b.date).getTime() - new Date(a.date).getTime()
       );
 
-      // Previous performance: same exercise, same set index, last occurrence
+      // Previous performance: same exercise, same set type and index-in-type, last occurrence
       const lastSessionWithExercise = sortedSessions.find(session => 
         session.exercises.some(ex => ex.exerciseTemplateId === currentExercise.id)
       );
@@ -126,9 +166,19 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
         const exerciseLog = lastSessionWithExercise.exercises.find(
           ex => ex.exerciseTemplateId === currentExercise.id
         );
-        if (exerciseLog && exerciseLog.sets[currentSetIndex]) {
-          const setLog = exerciseLog.sets[currentSetIndex];
-          setPreviousPerformance({ weight: setLog.weight, reps: setLog.reps, failureType: setLog.failureType });
+        if (exerciseLog) {
+          const currentSetsOfType = loggedSetsForCurrentExercise.filter(s => s.type === selectedSetType);
+          const currentSetIndexInType = currentSetsOfType.length;
+          
+          const prevSetsOfType = exerciseLog.sets.filter(s => s.type === selectedSetType);
+          const prevSet = prevSetsOfType[currentSetIndexInType];
+
+          if (prevSet) {
+            setPreviousPerformance({ weight: prevSet.weight, reps: prevSet.reps, failureType: prevSet.failureType });
+          } else {
+            // Fallback to first set of this type
+            setPreviousPerformance(prevSetsOfType[0] ? { weight: prevSetsOfType[0].weight, reps: prevSetsOfType[0].reps, failureType: prevSetsOfType[0].failureType } : null);
+          }
         } else {
           setPreviousPerformance(null);
         }
@@ -161,7 +211,7 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     };
 
     fetchHistory();
-  }, [currentExercise.id, currentSetIndex]);
+  }, [currentExercise.id, selectedSetType, loggedSetsForCurrentExercise.length]);
 
   const clearSetForm = () => {
     setWeight('');
@@ -170,60 +220,43 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     setFailureType(FailureType.REMAINING_REPS);
   }
 
-  const goToNextExercise = () => {
-    setCurrentSetIndex(0);
-    setCurrentExerciseIndex(prev => prev + 1);
-  }
+  const handleTriggerFinishFlow = () => {
+    // Check if there are exercises with no logged sets
+    const uncompleted = currentWorkout.exercises.filter(ex => {
+      const sets = savedWorkoutSession.exercises.find(e => e.exerciseTemplateId === ex.id)?.sets || [];
+      return sets.length === 0;
+    });
 
-  const handleHasNextSet = () => {
-    return currentSetIndex < currentExercise.sets.length - 1;
-  }
-
-  const handleHasNextExercise = () => {
-    return currentExerciseIndex < workout.exercises.length - 1;
-  }
-
-  const goToNextSet = () => {
-    if (handleHasNextSet()) {
-      setCurrentSetIndex(prev => prev + 1);
-    } else if (handleHasNextExercise()) {
-      goToNextExercise();
+    if (uncompleted.length > 0) {
+      setIsMissingModalVisible(true);
     } else {
       setIsFinishModalVisible(true);
     }
   }
 
-  const getNextSetRestTime = () => {
-    if (handleHasNextSet()) {
-      return currentExercise.sets[currentSetIndex + 1].restTime;
-    } else if (handleHasNextExercise()) {
-      return workout.exercises[currentExerciseIndex + 1].sets[0].restTime;
-    }
-    return undefined;
-  }
-
   const startRestTimer = () => {
-    const nextRestTime = getNextSetRestTime();
-    const restSeconds = getRestTimeTypeSeconds(nextRestTime);
+    const restSeconds = getIntelligentRestTime(
+      currentExercise.name,
+      currentExercise.muscleGroup,
+      selectedSetType
+    );
 
     if (restSeconds > 0) {
       setTimerEndTime(Date.now() + restSeconds * 1000);
       setSecondsLeft(restSeconds);
       setIsResting(true);
-    } else {
-      goToNextSet();
     }
   }
 
   const skipRest = () => {
     setIsResting(false);
     setSecondsLeft(0);
-    goToNextSet();
+    setTimerEndTime(null);
   }
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-      if (isFinishModalVisible) {
+      if (isFinishModalVisible || isMissingModalVisible) {
         return;
       }
 
@@ -232,7 +265,7 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     });
 
     return unsubscribe;
-  }, [navigation, isFinishModalVisible]);
+  }, [navigation, isFinishModalVisible, isMissingModalVisible]);
 
   useEffect(() => {
     let timer: ReturnType<typeof setInterval>;
@@ -245,7 +278,6 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
           Vibration.vibrate([0, 1000, 200, 1000, 200, 1000]);
           setIsResting(false);
           setTimerEndTime(null);
-          goToNextSet();
         }
       }, 1000);
     }
@@ -253,7 +285,7 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
   }, [isResting, timerEndTime]);
 
   const onEndPressed = () => {
-    navigation.goBack();
+    handleTriggerFinishFlow();
   }
 
   const onConfirmExit = async () => {
@@ -316,13 +348,17 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
   const handleSaveNewSet = () => {
     const newSetLog: SetLog = {
       id: Date.now().toString(),
-      templateSetId: currentSet.id,
-      type: currentSet.type,
+      type: selectedSetType,
       weight: Number(weight),
       reps: Number(reps),
       failureType,
       notes: observation,
     };
+
+    // Remove current exercise from skipped list if it was there
+    if (skippedExerciseIds.includes(currentExercise.id)) {
+      setSkippedExerciseIds(prev => prev.filter(id => id !== currentExercise.id));
+    }
 
     setSavedWorkoutSession(prev => {
       const existingIndex = prev.exercises.findIndex(
@@ -339,18 +375,27 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
         const nextExercisesLog = [...prev.exercises];
         nextExercisesLog[existingIndex] = updatedExerciseLog;
 
-        return { ...prev, exercises: nextExercisesLog };
+        const updatedSession = { ...prev, exercises: nextExercisesLog };
+        
+        // Auto-suggest next set type based on the newly saved sets
+        suggestNextSetType(updatedExerciseLog.sets);
+        
+        return updatedSession;
       }
 
-      // Add new exercise log holding the old one
+      // Add new exercise log holding the set
       const newExerciseLog: ExerciseLog = {
         exerciseTemplateId: currentExercise.id,
         notes: observation,
         sets: [newSetLog],
       };
 
-      return { ...prev, exercises: [...prev.exercises, newExerciseLog] };
+      const updatedSession = { ...prev, exercises: [...prev.exercises, newExerciseLog] };
+      
+      // Auto-suggest next set type based on the newly saved sets
+      suggestNextSetType(newExerciseLog.sets);
 
+      return updatedSession;
     });
   }
 
@@ -361,14 +406,78 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
   }
 
   const exText = `Exercício ${currentExerciseIndex + 1}/${workout.exercises.length}`;
-  const setText = `Série ${currentSetIndex + 1}/${workout.exercises[currentExerciseIndex].sets.length}`;
+  const setText = `Série ${loggedSetsForCurrentExercise.length + 1}`;
   const hint = `${exText} • ${setText}`;
 
-  const shouldShowObservationField = currentSet.type === SetType.TopSet || currentSet.type === SetType.WorkSet
+  const shouldShowObservationField = selectedSetType === SetType.TopSet || selectedSetType === SetType.WorkSet;
+
+  // Horizontal list of exercises and their statuses
+  const exercisesState = currentWorkout.exercises.map(ex => {
+    const loggedSets = savedWorkoutSession.exercises.find(e => e.exerciseTemplateId === ex.id)?.sets || [];
+    const isCompleted = loggedSets.length > 0;
+    const isSkipped = skippedExerciseIds.includes(ex.id);
+    return {
+      id: ex.id,
+      name: ex.name,
+      muscleGroup: ex.muscleGroup,
+      isCompleted,
+      isSkipped,
+      loggedSetsCount: loggedSets.length,
+    };
+  });
+
+  const goToExercise = (index: number) => {
+    if (index >= 0 && index < currentWorkout.exercises.length) {
+      setCurrentExerciseIndex(index);
+      clearSetForm();
+      const existingSets = savedWorkoutSession.exercises.find(
+        ex => ex.exerciseTemplateId === currentWorkout.exercises[index].id
+      )?.sets || [];
+      suggestNextSetType(existingSets);
+    }
+  };
+
+  const onSkipExercisePressed = () => {
+    const loggedSets = savedWorkoutSession.exercises.find(
+      ex => ex.exerciseTemplateId === currentExercise.id
+    )?.sets || [];
+    
+    if (loggedSets.length === 0) {
+      setSkippedExerciseIds(prev => [...new Set([...prev, currentExercise.id])]);
+    }
+    
+    if (currentExerciseIndex < currentWorkout.exercises.length - 1) {
+      setCurrentExerciseIndex(prev => prev + 1);
+      clearSetForm();
+    } else {
+      handleTriggerFinishFlow();
+    }
+  };
+
+  const onPrevExercisePressed = () => {
+    if (currentExerciseIndex > 0) {
+      setCurrentExerciseIndex(prev => prev - 1);
+      clearSetForm();
+    }
+  };
+
+  const onNextExercisePressed = () => {
+    if (currentExerciseIndex < currentWorkout.exercises.length - 1) {
+      setCurrentExerciseIndex(prev => prev + 1);
+      clearSetForm();
+    } else {
+      handleTriggerFinishFlow();
+    }
+  };
+
+  const uncompletedExercises = currentWorkout.exercises.filter(ex => {
+    const sets = savedWorkoutSession.exercises.find(e => e.exerciseTemplateId === ex.id)?.sets || [];
+    return sets.length === 0;
+  });
+  const missingExerciseNames = uncompletedExercises.map(ex => ex.name);
 
   return {
     currentExerciseIndex,
-    currentSetIndex,
     weight,
     setWeight,
     reps,
@@ -377,6 +486,8 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     setObservation,
     failureType,
     setFailureType,
+    selectedSetType,
+    setSelectedSetType,
     hint,
     onEndPressed,
     onSaveSetPressed,
@@ -384,7 +495,6 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     onConfirmExit,
     onCancelExit,
     currentExercise,
-    currentSet,
     shouldShowObservationField,
     isFinishModalVisible,
     duration,
@@ -401,5 +511,20 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     onCancelEditDescription: () => setIsEditDescriptionModalVisible(false),
     previousPerformance,
     personalRecord,
+
+    // Evolver 2.0 properties
+    exercisesState,
+    loggedSetsForCurrentExercise,
+    goToExercise,
+    onSkipExercisePressed,
+    onPrevExercisePressed,
+    onNextExercisePressed,
+    isMissingModalVisible,
+    setIsMissingModalVisible,
+    missingExerciseNames,
+    onConfirmMissingExercises: () => {
+      setIsMissingModalVisible(false);
+      setIsFinishModalVisible(true);
+    },
   };
 }

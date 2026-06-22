@@ -1,11 +1,12 @@
-import React from 'react';
-import { View, Text, FlatList, Pressable, Alert } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, Text, SectionList, Pressable, Alert } from 'react-native';
 
 import { Header } from '../../components/Header';
 import { useHistory, HistoryItem } from '../../hooks/useHistory';
-import { getDayOfWeekFromDate, formatDate } from '../../utils/dateUtils';
+import { formatDate } from '../../utils/dateUtils';
 import { useAppNavigation } from '@/hooks/useAppNavigation';
 import { Routes } from '@/app/navigation/routes';
+import { DayOfWeek, DAY_OF_WEEK_ORDER, getDayOfWeekMessage } from '../../models/DayOfWeek';
 
 import { styles } from './styles';
 
@@ -29,16 +30,54 @@ export function HistoryScreen() {
     );
   };
 
+  const groupedHistory = useMemo(() => {
+    const days = [
+      DayOfWeek.SUNDAY,
+      DayOfWeek.MONDAY,
+      DayOfWeek.TUESDAY,
+      DayOfWeek.WEDNESDAY,
+      DayOfWeek.THURSDAY,
+      DayOfWeek.FRIDAY,
+      DayOfWeek.SATURDAY,
+    ];
+
+    const groups: Record<DayOfWeek, HistoryItem[]> = {
+      [DayOfWeek.MONDAY]: [],
+      [DayOfWeek.TUESDAY]: [],
+      [DayOfWeek.WEDNESDAY]: [],
+      [DayOfWeek.THURSDAY]: [],
+      [DayOfWeek.FRIDAY]: [],
+      [DayOfWeek.SATURDAY]: [],
+      [DayOfWeek.SUNDAY]: [],
+    };
+
+    history.forEach(item => {
+      const dayOfWeek = days[item.date.getDay()];
+      groups[dayOfWeek].push(item);
+    });
+
+    return Object.entries(groups)
+      .map(([key, sessions]) => ({
+        dayOfWeek: key as DayOfWeek,
+        title: getDayOfWeekMessage(key as DayOfWeek),
+        data: sessions,
+      }))
+      .filter(group => group.data.length > 0)
+      .sort((a, b) => DAY_OF_WEEK_ORDER[a.dayOfWeek] - DAY_OF_WEEK_ORDER[b.dayOfWeek]);
+  }, [history]);
+
   const renderItem = ({ item }: { item: HistoryItem }) => {
     const date = item.date;
-    const dayName = getDayOfWeekFromDate(date);
     const formattedDate = formatDate(date);
 
     const formatDuration = (min?: number) => {
       if (!min) return null;
       const hours = Math.floor(min / 60);
       const remainingMinutes = min % 60;
-      return `${hours.toString().padStart(2, '0')}h ${remainingMinutes.toString().padStart(2, '0')}m`;
+      if (hours > 0) {
+        return `${hours.toString().padStart(2, '0')}h ${remainingMinutes.toString().padStart(2, '0')}m`;
+      }
+      return `${remainingMinutes} min`;
     };
 
     const durationText = formatDuration(item.duration);
@@ -49,10 +88,9 @@ export function HistoryScreen() {
         onPress={() => navigation.navigate(Routes.WorkoutSessionDetail, { session: item })}
       >
         <View style={styles.cardHeader}>
-          <Text style={styles.dayOfWeek}>{dayName}</Text>
+          <Text style={styles.routineName}>{item.routineName}</Text>
           <Text style={styles.dateText}>{formattedDate}</Text>
         </View>
-        <Text style={styles.routineName}>{item.routineName}</Text>
 
         {(durationText || item.caloriesEstimated) && (
           <View style={styles.sessionInfoContainer}>
@@ -63,7 +101,7 @@ export function HistoryScreen() {
             )}
             {item.caloriesEstimated && (
               <Text style={styles.sessionInfoText}>
-                Calorias: <Text style={styles.sessionInfoValue}>{item.caloriesEstimated} kcal</Text>
+                Calorias: <Text style={styles.sessionInfoValue}>{Math.round(item.caloriesEstimated)} kcal</Text>
               </Text>
             )}
           </View>
@@ -71,6 +109,12 @@ export function HistoryScreen() {
       </Pressable>
     );
   };
+
+  const renderSectionHeader = ({ section: { title } }: { section: { title: string } }) => (
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
@@ -81,11 +125,13 @@ export function HistoryScreen() {
           <Text>Carregando...</Text>
         </View>
       ) : (
-        <FlatList
-          data={history}
+        <SectionList
+          sections={groupedHistory}
           keyExtractor={item => item.id}
           renderItem={renderItem}
+          renderSectionHeader={renderSectionHeader}
           contentContainerStyle={styles.listContent}
+          stickySectionHeadersEnabled={false}
           ListEmptyComponent={
             <View style={styles.centered}>
               <Text style={styles.emptyText}>Nenhuma sessão encontrada.</Text>

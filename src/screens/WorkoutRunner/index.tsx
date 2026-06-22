@@ -5,10 +5,11 @@ import { useAppRouteParams } from '@/hooks/useAppRouteParams';
 import { useWorkoutRunner } from './useWorkoutRunner';
 import { Header } from '@/components/Header';
 import { getMuscleGroupMessage } from '@/models/MuscleGroup';
-import { getSetTypeMessage } from '@/models/SetType';
+import { getSetTypeMessage, SetType } from '@/models/SetType';
 import { FailureType, FailureTypeMessage } from '@/models/FailureType';
 import { ConfirmationModal } from '@/components/ConfirmationModal';
 import { FinishWorkoutModal } from '@/components/FinishWorkoutModal';
+import { MissingExercisesModal } from '@/components/MissingExercisesModal';
 import { EditDescriptionModal } from '@/components/EditDescriptionModal';
 
 import { styles } from './styles';
@@ -17,6 +18,7 @@ export const WorkoutRunnerScreen = () => {
   const { routineTemplateId, workout } = useAppRouteParams<'WorkoutRunner'>();
 
   const {
+    currentExerciseIndex,
     hint,
     weight,
     setWeight,
@@ -24,13 +26,14 @@ export const WorkoutRunnerScreen = () => {
     setReps,
     failureType,
     setFailureType,
+    selectedSetType,
+    setSelectedSetType,
     onEndPressed,
     onSaveSetPressed,
     isExitModalVisible,
     onConfirmExit,
     onCancelExit,
     currentExercise,
-    currentSet,
     observation,
     setObservation,
     shouldShowObservationField,
@@ -49,6 +52,18 @@ export const WorkoutRunnerScreen = () => {
     onCancelEditDescription,
     previousPerformance,
     personalRecord,
+
+    // Evolver 2.0 properties
+    exercisesState,
+    loggedSetsForCurrentExercise,
+    goToExercise,
+    onSkipExercisePressed,
+    onPrevExercisePressed,
+    onNextExercisePressed,
+    isMissingModalVisible,
+    setIsMissingModalVisible,
+    missingExerciseNames,
+    onConfirmMissingExercises,
   } = useWorkoutRunner(routineTemplateId, workout);
 
   return (
@@ -56,7 +71,43 @@ export const WorkoutRunnerScreen = () => {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Header title={workout.dayOfWeek} onActionPress={onEndPressed} showBackButton />
+      <Header title={workout.description || workout.dayOfWeek} onActionPress={onEndPressed} showBackButton />
+      
+      {/* Exercise Horizontal Tabs Bar */}
+      <View style={styles.exerciseNavWrapper}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.exerciseNavContainer}
+          contentContainerStyle={styles.exerciseNavContent}
+        >
+          {exercisesState.map((ex, index) => {
+            const isActive = index === currentExerciseIndex;
+            return (
+              <Pressable
+                key={ex.id}
+                style={[
+                  styles.exerciseNavTab,
+                  isActive && styles.exerciseNavTabActive,
+                  ex.isCompleted && styles.exerciseNavTabCompleted,
+                  ex.isSkipped && styles.exerciseNavTabSkipped,
+                ]}
+                onPress={() => goToExercise(index)}
+              >
+                <Text style={[
+                  styles.exerciseNavTabText,
+                  isActive && styles.exerciseNavTabTextActive,
+                  ex.isCompleted && styles.exerciseNavTabTextCompleted,
+                  ex.isSkipped && styles.exerciseNavTabTextSkipped,
+                ]}>
+                  {ex.isCompleted ? '✓ ' : ex.isSkipped ? '⚠ ' : ''}{ex.name}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      </View>
+
       <Text style={styles.title}>{hint}</Text>
 
       <ScrollView
@@ -64,25 +115,23 @@ export const WorkoutRunnerScreen = () => {
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets={true}
       >
-
+        {/* Active Exercise Detail */}
         <View style={styles.exerciseInfoContainer}>
-
           <View style={styles.muscleBadge}>
             <Text style={styles.muscleText} numberOfLines={1}>{getMuscleGroupMessage(currentExercise.muscleGroup)}</Text>
           </View>
 
           <View style={styles.exerciseInfoTextContainer}>
             <Text style={styles.exerciseName}>{currentExercise.name}</Text>
-            <Text style={styles.currentSetType}>{getSetTypeMessage(currentSet.type)}</Text>
           </View>
-
         </View>
 
+        {/* Previous performance & personal record */}
         {(previousPerformance || personalRecord) && (
           <View style={styles.performanceContainer}>
             {previousPerformance && (
               <View style={styles.performanceItem}>
-                <Text style={styles.performanceLabel}>Anterior</Text>
+                <Text style={styles.performanceLabel}>Anterior (Mesmo tipo)</Text>
                 <Text style={styles.performanceValue}>
                   {previousPerformance.weight}kg x {previousPerformance.reps} {previousPerformance.failureType ? `(${FailureTypeMessage[previousPerformance.failureType]})` : ''}
                 </Text>
@@ -90,13 +139,14 @@ export const WorkoutRunnerScreen = () => {
             )}
             {personalRecord && (
               <View style={styles.performanceItem}>
-                <Text style={styles.performanceLabel}>PR</Text>
+                <Text style={styles.performanceLabel}>PR Geral</Text>
                 <Text style={styles.performanceValue}>{personalRecord.weight}kg x {personalRecord.reps}</Text>
               </View>
             )}
           </View>
         )}
 
+        {/* Exercise Description / Notes */}
         <Pressable 
           style={styles.exerciseDescriptionContainer}
           onPress={onEditDescriptionPressed}
@@ -104,67 +154,110 @@ export const WorkoutRunnerScreen = () => {
           {currentExercise.description ? (
             <Text style={styles.exerciseDescriptionText}>{currentExercise.description}</Text>
           ) : (
-            <Text style={styles.addDescriptionText}>+ Adicionar observação</Text>
+            <Text style={styles.addDescriptionText}>+ Adicionar observação ao exercício</Text>
           )}
         </Pressable>
 
         <View style={styles.divider} />
 
-        <View style={styles.setFormContent}>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Carga (kg)</Text>
-            <TextInput
-              style={styles.input}
-              value={weight}
-              onChangeText={setWeight}
-              keyboardType="numeric"
-              placeholder="0"
-              autoFocus={false}
-            />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Repetições</Text>
-            <TextInput
-              style={styles.input}
-              value={reps}
-              onChangeText={setReps}
-              keyboardType="numeric"
-              placeholder="0"
-              maxLength={2}
-            />
-          </View>
-
-          {
-            shouldShowObservationField && (
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Observação</Text>
-                <TextInput
-                  style={styles.input}
-                  value={observation}
-                  onChangeText={setObservation}
-                  keyboardType="default"
-                />
+        {/* Logged Sets for this Exercise */}
+        {loggedSetsForCurrentExercise.length > 0 && (
+          <View style={styles.loggedSetsContainer}>
+            <Text style={styles.sectionSubtitle}>Séries Realizadas</Text>
+            {loggedSetsForCurrentExercise.map((set, idx) => (
+              <View key={set.id} style={styles.loggedSetRow}>
+                <Text style={styles.loggedSetIndex}>{idx + 1}º</Text>
+                <View style={styles.loggedSetDetails}>
+                  <Text style={styles.loggedSetTypeText}>{getSetTypeMessage(set.type)}</Text>
+                  <Text style={styles.loggedSetValueText}>
+                    {set.weight}kg x {set.reps} reps {set.failureType ? `(${FailureTypeMessage[set.failureType]})` : ''}
+                  </Text>
+                </View>
+                {!!set.notes && <Text style={styles.loggedSetNotes}>{set.notes}</Text>}
               </View>
-            )
-          }
+            ))}
+            <View style={styles.divider} />
+          </View>
+        )}
+
+        {/* Save Set Form */}
+        <View style={styles.setFormContent}>
+          {/* Dynamic Set Type Selector */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Tipo de Série</Text>
+            <View style={styles.setTypeSelector}>
+              {Object.values(SetType).map((type) => (
+                <Pressable
+                  key={type}
+                  style={[
+                    styles.setTypeChip,
+                    selectedSetType === type && styles.setTypeChipSelected
+                  ]}
+                  onPress={() => setSelectedSetType(type)}
+                >
+                  <Text style={[
+                    styles.setTypeChipText,
+                    selectedSetType === type && styles.setTypeChipTextSelected
+                  ]}>
+                    {getSetTypeMessage(type)}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.inputRow}>
+            <View style={[styles.inputContainer, { flex: 1 }]}>
+              <Text style={styles.label}>Carga (kg)</Text>
+              <TextInput
+                style={styles.input}
+                value={weight}
+                onChangeText={setWeight}
+                keyboardType="numeric"
+                placeholder="0"
+              />
+            </View>
+
+            <View style={[styles.inputContainer, { flex: 1 }]}>
+              <Text style={styles.label}>Repetições</Text>
+              <TextInput
+                style={styles.input}
+                value={reps}
+                onChangeText={setReps}
+                keyboardType="numeric"
+                placeholder="0"
+                maxLength={3}
+              />
+            </View>
+          </View>
+
+          {shouldShowObservationField && (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Observação da Série</Text>
+              <TextInput
+                style={styles.input}
+                value={observation}
+                onChangeText={setObservation}
+                placeholder="Ex: Sentimento de esforço"
+              />
+            </View>
+          )}
 
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Tipo de Falha</Text>
-            <View style={styles.setTypeSelector}>
+            <View style={styles.failureTypeSelector}>
               {Object.entries(FailureTypeMessage).map(([key, label]) => (
                 <Pressable
                   key={key}
                   style={[
-                    styles.setTypeChip,
-                    failureType === key && styles.setTypeChipSelected
+                    styles.failureTypeChip,
+                    failureType === key && styles.failureTypeChipSelected
                   ]}
                   onPress={() => setFailureType(key as FailureType)}
                 >
                   <Text style={[
-                    styles.setTypeChipText,
-                    failureType === key && styles.setTypeChipTextSelected
+                    styles.failureTypeChipText,
+                    failureType === key && styles.failureTypeChipTextSelected
                   ]}>
                     {label}
                   </Text>
@@ -182,10 +275,28 @@ export const WorkoutRunnerScreen = () => {
           )}
         </View>
 
+        {/* Exercise skipping / navigation */}
+        <View style={styles.navigationButtonsRow}>
+          <Pressable
+            style={[styles.navBtn, currentExerciseIndex === 0 && styles.navBtnDisabled]}
+            onPress={onPrevExercisePressed}
+            disabled={currentExerciseIndex === 0}
+          >
+            <Text style={styles.navBtnText}>◀ Anterior</Text>
+          </Pressable>
+
+          <Pressable
+            style={styles.skipBtn}
+            onPress={onSkipExercisePressed}
+          >
+            <Text style={styles.skipBtnText}>Pular / Próximo ⏭</Text>
+          </Pressable>
+        </View>
       </ScrollView>
 
+      {/* Floating Action Button to manually trigger finish workout checklist */}
       <Pressable style={styles.fab} onPress={onEndPressed}>
-        <Text style={styles.fabIcon}>✋</Text>
+        <Text style={styles.fabIcon}>🏁</Text>
       </Pressable>
 
       <ConfirmationModal
@@ -196,6 +307,13 @@ export const WorkoutRunnerScreen = () => {
         cancelText="Não"
         onConfirm={onConfirmExit}
         onCancel={onCancelExit}
+      />
+
+      <MissingExercisesModal
+        visible={isMissingModalVisible}
+        missingExerciseNames={missingExerciseNames}
+        onConfirm={onConfirmMissingExercises}
+        onCancel={() => setIsMissingModalVisible(false)}
       />
 
       <FinishWorkoutModal
@@ -209,7 +327,7 @@ export const WorkoutRunnerScreen = () => {
 
       {isResting && (
         <View style={styles.timerOverlay}>
-          <Text style={styles.timerTitle}>Descanso</Text>
+          <Text style={styles.timerTitle}>Descanso Inteligente</Text>
           <Text style={styles.timerSeconds}>{secondsLeft}</Text>
           <Text style={styles.timerLabel}>segundos</Text>
 

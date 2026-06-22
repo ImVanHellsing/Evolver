@@ -87,7 +87,13 @@ export const WorkoutProgressScreen = () => {
       const prevExercise = prev.exercises.find(e => e.exerciseTemplateId === currExercise.exerciseTemplateId);
 
       const sets: SetComparison[] = currExercise.sets.map(currSet => {
-        const prevSet = prevExercise?.sets.find(s => s.templateSetId === currSet.templateSetId);
+        // Find the index of the current set among sets of the same type
+        const currentSetsOfType = currExercise.sets.filter(s => s.type === currSet.type);
+        const indexInType = currentSetsOfType.indexOf(currSet);
+
+        // Find the matching set in the previous exercise with the same type and index-in-type
+        const prevSetsOfType = prevExercise?.sets.filter(s => s.type === currSet.type) || [];
+        const prevSet = prevSetsOfType[indexInType];
 
         let status: ProgressionStatus = 'stagnation';
 

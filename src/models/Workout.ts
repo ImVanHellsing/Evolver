@@ -24,6 +24,6 @@ export interface WorkoutSession {
 
 export const getWorkoutAmountOfValidSets = (workout: WorkoutTemplate) => {
 	return workout.exercises.reduce((acc, exercise) => {
-		return acc + exercise.sets.filter(set => set.type === SetType.WorkSet || set.type === SetType.TopSet).length;
+		return acc + (exercise.sets || []).filter(set => set.type === SetType.WorkSet || set.type === SetType.TopSet).length;
 	}, 0);
 }

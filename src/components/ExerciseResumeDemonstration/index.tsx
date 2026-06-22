@@ -23,17 +23,19 @@ export const ExerciseResumeDemonstration = ({ exercise, onPress, onEditDescripti
   };
 
   const getExercisePersonalRecordText = (exercise: ExerciseTemplate) => {
-    if (!exercise.sets || exercise.sets.length === 0) return 'Sem séries';
-    const lastSet = exercise.sets[exercise.sets.length - 1];
+    const sets = exercise.sets || [];
+    if (sets.length === 0) return null;
+    const lastSet = sets[sets.length - 1];
     const shouldShowPersonalRecord = lastSet && lastSet.weight && lastSet.reps
     const personalRecordText = shouldShowPersonalRecord ? `PR ${lastSet.weight} kgs x ${lastSet.reps} ${getFailureTypeMessage(lastSet.failureType)}` : '';
     return shouldShowPersonalRecord ? <Text style={styles.desc}>{personalRecordText}</Text> : null;
   };
 
-  const getAmountOfSetsText = (sets: SetTemplate[]) => {
+  const getAmountOfSetsText = (sets?: SetTemplate[]) => {
+    if (!sets || sets.length === 0) return 'Séries livres';
     const validSetTypes = [SetType.TopSet, SetType.WorkSet];
     const validSets = sets.filter((set) => validSetTypes.includes(set.type));
-    if (!validSets || validSets.length === 0) return '0 séries';
+    if (!validSets || validSets.length === 0) return 'Séries livres';
     return `${validSets.length} ${validSets.length === 1 ? 'x Série válida' : 'x Séries válidas'}`;
   };
 

@@ -10,9 +10,10 @@ import { Routes } from "@/app/navigation/routes";
 import { getWorkoutAmountOfValidSets, WorkoutTemplate } from "@/models/Workout";
 import { SetType } from "@/models/SetType";
 import { getMuscleGroupTranslate, MuscleGroup } from "@/models/MuscleGroup";
-import { getDayOfWeekMessage } from "@/models/DayOfWeek";
+import { getDayOfWeekMessage, DayOfWeek } from "@/models/DayOfWeek";
 import { useWorkouts } from "./useWorkouts";
 import { routinesRepository } from "@/services/routines/routinesRepository";
+import { CreateWorkoutModal } from "@/components/CreateWorkoutModal";
 
 import { styles } from "./styles";
 
@@ -23,21 +24,29 @@ export const WorkoutScreen = () => {
 
   const { routine } = useAppRouteParams<'Workouts'>();
 
-  const [isModalVisible, setModalVisible] = useState(false);
+  const [isVolumeModalVisible, setVolumeModalVisible] = useState(false);
+  const [isCreateModalVisible, setCreateModalVisible] = useState(false);
   const [currentRoutine, setCurrentRoutine] = useState(routine);
+
+  const refreshRoutine = async () => {
+    const updatedRoutine = await routinesRepository.getById(routine.id);
+    if (updatedRoutine) {
+      setCurrentRoutine(updatedRoutine);
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
 
-      const refreshRoutine = async () => {
+      const runRefresh = async () => {
         const updatedRoutine = await routinesRepository.getById(routine.id);
         if (isActive && updatedRoutine) {
           setCurrentRoutine(updatedRoutine);
         }
       };
 
-      refreshRoutine();
+      runRefresh();
 
       return () => {
         isActive = false;
@@ -62,8 +71,25 @@ export const WorkoutScreen = () => {
     }
   }
 
+  const handleCreateWorkout = async (dayOfWeek: DayOfWeek, description: string) => {
+    const newWorkout: WorkoutTemplate = {
+      id: `workout-${Date.now()}`,
+      dayOfWeek,
+      description,
+      exercises: [],
+    };
+    const updatedRoutine = {
+      ...currentRoutine,
+      workouts: [...currentRoutine.workouts, newWorkout],
+    };
+    await routinesRepository.save(updatedRoutine);
+    setCurrentRoutine(updatedRoutine);
+    setCreateModalVisible(false);
+  };
+
   const getExercisesResumedList = (exercises: ExerciseTemplate[]) => {
     const filteredExercises = exercises.filter((_, index) => index < MAX_EXERCISES_RESUMED_LIST);
+    if (filteredExercises.length === 0) return 'Sem exercícios cadastrados';
     return `${filteredExercises.map((exercise, index) => {
       return `${index > 0 ? ' - ' : ''}${exercise.name}`;
     }).join('')}${exercises.length > MAX_EXERCISES_RESUMED_LIST ? '...' : ''}`
@@ -72,9 +98,9 @@ export const WorkoutScreen = () => {
   const volumeSummary = useMemo(() => {
     const summary: Record<string, number> = {};
 
-    routine.workouts.forEach(workout => {
+    currentRoutine.workouts.forEach(workout => {
       workout.exercises.forEach(exercise => {
-        const validSets = exercise.sets.filter(set =>
+        const validSets = (exercise.sets || []).filter(set =>
           set.type === SetType.WorkSet || set.type === SetType.TopSet
         ).length;
 
@@ -98,12 +124,15 @@ export const WorkoutScreen = () => {
       <Header title={currentRoutine.name} showBackButton />
       <View style={styles.innerContainer}>
         <Text style={styles.hint}>Pressione para ver os detalhes de um treino</Text>
-        <Pressable style={styles.summaryButton} onPress={() => setModalVisible(true)}>
+        <Pressable style={styles.summaryButton} onPress={() => setVolumeModalVisible(true)}>
           <Text style={styles.summaryButtonText}>📊 Ver Resumo de Volume</Text>
         </Pressable>
 
         <Text style={styles.title}>Treinos</Text>
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView 
+          contentContainerStyle={{ paddingBottom: 80 }}
+          showsVerticalScrollIndicator={false}
+        >
           {workoutsWithLastSession.map(({ workout, lastSession }) => (
             <Pressable
               key={workout.id}
@@ -113,7 +142,7 @@ export const WorkoutScreen = () => {
             >
               <Text style={styles.bigButtonTitle}>{getDayOfWeekMessage(workout.dayOfWeek)}</Text>
               <Text style={styles.bigButtonDesc}>{workout.description}</Text>
-              <Text style={styles.bigButtonDesc}>{getWorkoutAmountOfValidSets(workout)} séries</Text>
+              <Text style={styles.bigButtonDesc}>{workout.exercises.length} exercícios</Text>
               <Text style={styles.bigButtonDesc}>{getExercisesResumedList(workout.exercises)}</Text>
 
               {!!lastSession && (
@@ -140,14 +169,24 @@ export const WorkoutScreen = () => {
         </ScrollView>
       </View>
 
+      <Pressable style={styles.fab} onPress={() => setCreateModalVisible(true)}>
+        <Text style={styles.fabIcon}>+</Text>
+      </Pressable>
+
+      <CreateWorkoutModal
+        visible={isCreateModalVisible}
+        onSave={handleCreateWorkout}
+        onCancel={() => setCreateModalVisible(false)}
+      />
+
       <Modal
-        visible={isModalVisible}
+        visible={isVolumeModalVisible}
         transparent
         animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={() => setVolumeModalVisible(false)}
       >
         <View style={styles.modalContainer}>
-          <Pressable style={{ flex: 1 }} onPress={() => setModalVisible(false)} />
+          <Pressable style={{ flex: 1 }} onPress={() => setVolumeModalVisible(false)} />
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Volume por Grupamento</Text>
             <ScrollView>
@@ -158,7 +197,7 @@ export const WorkoutScreen = () => {
                 </View>
               ))}
             </ScrollView>
-            <Pressable style={styles.closeButton} onPress={() => setModalVisible(false)}>
+            <Pressable style={styles.closeButton} onPress={() => setVolumeModalVisible(false)}>
               <Text style={styles.closeButtonText}>Fechar</Text>
             </Pressable>
           </View>

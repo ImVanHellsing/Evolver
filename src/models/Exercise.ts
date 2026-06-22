@@ -6,7 +6,7 @@ export interface ExerciseTemplate {
 	name: string;
 	description: string;
 	muscleGroup: MuscleGroup;
-	sets: SetTemplate[]
+	sets?: SetTemplate[]
 }
 
 export interface ExerciseLog {

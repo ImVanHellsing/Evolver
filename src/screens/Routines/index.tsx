@@ -1,27 +1,41 @@
-import React from 'react';
-import { View, Text, Pressable, Alert, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Pressable, ScrollView } from 'react-native';
 
 import { Header } from '@/components/Header';
 import { RoutineTemplate } from '@/models/Routine';
 import { useAppNavigation } from '@/hooks/useAppNavigation';
 import { useRoutines } from './useRoutines';
+import { CreateRoutineModal } from '@/components/CreateRoutineModal';
+import { routinesRepository } from '@/services/routines/routinesRepository';
 
 import { styles } from './styles';
 
 export const RoutinesScreen = () => {
 	const navigation = useAppNavigation();
 
-	const { routines, sessions, loading, isRoutineStartedText } = useRoutines();
+	const { routines, sessions, loading, reload, isRoutineStartedText } = useRoutines();
+	const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
 
 	const onAddRoutinePressed = () => {
-		Alert.alert('Funcionalidade em desenvolvimento', 'A criação de rotinas ainda não foi implementada.');
+		setIsCreateModalVisible(true);
+	}
+
+	const handleCreateRoutine = async (name: string) => {
+		const newRoutine: RoutineTemplate = {
+			id: `routine-${Date.now()}`,
+			name,
+			workouts: [],
+		};
+		await routinesRepository.save(newRoutine);
+		setIsCreateModalVisible(false);
+		reload();
 	}
 
 	const onRoutinePressed = (routine: RoutineTemplate) => {
 		navigation.navigate('Workouts', { routine });
 	}
 
-	if (loading) return <Text>Carregando...</Text>;
+	if (loading) return <Text style={{ padding: 16 }}>Carregando...</Text>;
 
 	return (
 		<View style={styles.container}>
@@ -38,9 +52,16 @@ export const RoutinesScreen = () => {
 					</Pressable>
 				))}
 			</ScrollView>
+			
 			<Pressable style={styles.fab} onPress={onAddRoutinePressed}>
 				<Text style={styles.fabIcon}>+</Text>
 			</Pressable>
+
+			<CreateRoutineModal
+				visible={isCreateModalVisible}
+				onSave={handleCreateRoutine}
+				onCancel={() => setIsCreateModalVisible(false)}
+			/>
 		</View>
 	);
 }

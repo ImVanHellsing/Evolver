@@ -14,6 +14,28 @@ export const routinesRepository = {
     console.log('[routinesRepository.seedIfEmpty] seed applied');
   },
 
+  async syncTemplates(seeds: RoutineTemplate[]): Promise<void> {
+    const res = await storage.getJson<RoutineTemplate[]>(STORAGE_KEYS.ROUTINES);
+    if (!res.ok) return;
+
+    let current = res.data ?? [];
+
+    seeds.forEach(seed => {
+      const index = current.findIndex(r => r.id === seed.id);
+      if (index !== -1) {
+        // Atualiza o template existente com a nova versão do código
+        current[index] = seed;
+      } else {
+        // Adiciona se for um template novo
+        current.push(seed);
+      }
+    });
+
+    await storage.setJson(STORAGE_KEYS.ROUTINES, current);
+    console.log('[routinesRepository.syncTemplates] templates synced');
+  },
+
+
   async list(): Promise<RoutineTemplate[]> {
     const res = await storage.getJson<RoutineTemplate[]>(STORAGE_KEYS.ROUTINES);
     console.log('[routinesRepository.list] res', res);

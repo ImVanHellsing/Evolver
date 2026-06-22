@@ -7,8 +7,10 @@ import { ExerciseTemplate } from "@/models/Exercise";
 import { ExerciseResumeDemonstration } from "@/components/ExerciseResumeDemonstration";
 import { ExerciseDetailsBottomSheet } from "@/components/ExerciseDetailsBottomSheet";
 import { EditDescriptionModal } from "@/components/EditDescriptionModal";
+import { EditWorkoutModal } from "@/components/EditWorkoutModal";
 import { useAppNavigation } from "@/hooks/useAppNavigation";
 import { routinesRepository } from "@/services/routines/routinesRepository";
+import { DayOfWeek } from "@/models/DayOfWeek";
 
 import { styles } from "./styles";
 
@@ -21,15 +23,41 @@ export const ExercisesScreen = () => {
   const [selectedExercise, setSelectedExercise] = useState<ExerciseTemplate>(currentWorkout.exercises[0]);
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   
-  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [isEditDescriptionModalVisible, setIsEditDescriptionModalVisible] = useState(false);
   const [editingExercise, setEditingExercise] = useState<ExerciseTemplate | null>(null);
+
+  const [isEditWorkoutModalVisible, setIsEditWorkoutModalVisible] = useState(false);
 
   const onRunWorkoutPressed = () => {
     navigation.navigate('WorkoutRunner', { routineTemplateId, workout: currentWorkout });
   }
 
   const onEditWorkoutPressed = () => {
-    Alert.alert('Funcionalidade em desenvolvimento', 'A edição de treinos ainda não foi implementada.');
+    setIsEditWorkoutModalVisible(true);
+  }
+
+  const handleEditWorkout = async (dayOfWeek: DayOfWeek, description: string) => {
+    try {
+      const routine = await routinesRepository.getById(routineTemplateId);
+      if (!routine) return;
+
+      const workoutIndex = routine.workouts.findIndex(w => w.id === currentWorkout.id);
+      if (workoutIndex === -1) return;
+
+      // Update the workout
+      routine.workouts[workoutIndex].dayOfWeek = dayOfWeek;
+      routine.workouts[workoutIndex].description = description;
+
+      // Save to repository
+      await routinesRepository.save(routine);
+
+      // Update local state to reflect changes instantly
+      setCurrentWorkout(routine.workouts[workoutIndex]);
+      setIsEditWorkoutModalVisible(false);
+    } catch (error) {
+      console.error('Error updating workout:', error);
+      Alert.alert('Erro', 'Ocorreu um problema ao salvar as alterações do treino.');
+    }
   }
 
   const onExercisePressed = (exercise: ExerciseTemplate) => {
@@ -39,7 +67,7 @@ export const ExercisesScreen = () => {
 
   const onEditDescriptionPressed = (exercise: ExerciseTemplate) => {
     setEditingExercise(exercise);
-    setIsEditModalVisible(true);
+    setIsEditDescriptionModalVisible(true);
   }
 
   const handleSaveDescription = async (newDescription: string) => {
@@ -64,7 +92,7 @@ export const ExercisesScreen = () => {
       // Update local state to reflect changes instantly
       setCurrentWorkout(routine.workouts[workoutIndex]);
 
-      setIsEditModalVisible(false);
+      setIsEditDescriptionModalVisible(false);
       setEditingExercise(null);
     } catch (error) {
       console.error('Error saving description:', error);
@@ -88,15 +116,27 @@ export const ExercisesScreen = () => {
   return (
     <View style={styles.container}>
       <Header title="Exercícios" showBackButton />
-      <ScrollView style={styles.innerContainer} showsVerticalScrollIndicator={false}>
-        {currentWorkout.exercises.map((exercise) => (
-          <ExerciseResumeDemonstration
-            key={exercise.name}
-            exercise={exercise}
-            onPress={onExercisePressed}
-            onEditDescription={onEditDescriptionPressed}
-          />
-        ))}
+      <ScrollView 
+        style={styles.innerContainer} 
+        contentContainerStyle={{ paddingBottom: 80 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {currentWorkout.exercises.length === 0 ? (
+          <View style={{ padding: 24, alignItems: 'center' }}>
+            <Text style={{ fontSize: 16, color: '#8E8E93', textAlign: 'center' }}>
+              Nenhum exercício cadastrado para este treino.
+            </Text>
+          </View>
+        ) : (
+          currentWorkout.exercises.map((exercise) => (
+            <ExerciseResumeDemonstration
+              key={exercise.id}
+              exercise={exercise}
+              onPress={onExercisePressed}
+              onEditDescription={onEditDescriptionPressed}
+            />
+          ))
+        )}
       </ScrollView>
 
       {renderActionButtons()}
@@ -109,15 +149,23 @@ export const ExercisesScreen = () => {
 
       {editingExercise && (
         <EditDescriptionModal
-          visible={isEditModalVisible}
+          visible={isEditDescriptionModalVisible}
           initialDescription={editingExercise.description || ''}
           onSave={handleSaveDescription}
           onCancel={() => {
-            setIsEditModalVisible(false);
+            setIsEditDescriptionModalVisible(false);
             setEditingExercise(null);
           }}
         />
       )}
+
+      <EditWorkoutModal
+        visible={isEditWorkoutModalVisible}
+        initialDayOfWeek={currentWorkout.dayOfWeek}
+        initialDescription={currentWorkout.description || ''}
+        onSave={handleEditWorkout}
+        onCancel={() => setIsEditWorkoutModalVisible(false)}
+      />
     </View>
   );
 }
