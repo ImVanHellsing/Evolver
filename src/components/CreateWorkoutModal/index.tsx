@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, View, Text, TextInput, Pressable, ScrollView } from 'react-native';
+import { Modal, View, Text, TextInput, Pressable } from 'react-native';
 import { DayOfWeek, DayOfWeekMessage } from '../../models/DayOfWeek';
 import { styles } from './styles';
 

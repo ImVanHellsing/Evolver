@@ -1,8 +1,10 @@
-import pplFb from './template-ppl-fb.json';
-import ppl from './template-ppl.json';
+import pplTest from './template-test.json';
+import pplNew from './template-ppl-fb-new.json';
+import tatianeTemplate from './template-tatiane.json';
 import { RoutineTemplate } from '@/models/Routine';
 
 export const routineTemplates: RoutineTemplate[] = [
-  pplFb as any,
-  ppl as any
+  pplNew as any,
+  tatianeTemplate as any,
+  pplTest as any
 ];

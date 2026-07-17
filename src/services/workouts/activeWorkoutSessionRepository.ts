@@ -1,6 +1,7 @@
 import { storage } from '../storage/storage';
 import { STORAGE_KEYS } from '../storage/storageKeys';
 import { WorkoutSession, WorkoutTemplate } from '@/models/Workout';
+import { SetType } from '@/models/SetType';
 
 export interface ActiveWorkoutSessionData {
   routineTemplateId: string;
@@ -13,6 +14,14 @@ export interface ActiveWorkoutSessionData {
   observation: string;
   isResting: boolean;
   timerEndTime: number | null;
+  skippedExerciseIds?: string[];
+  selectedSetType?: SetType;
+  lastCompletedSetType?: SetType | null;
+  lastCompletedSetTime?: number | null;
+  lastLoggedWeight?: number | null;
+  lastLoggedReps?: number | null;
+  hasSelectedInitialSetType?: boolean;
+  isChoosingNextAction?: boolean;
 }
 
 export const activeWorkoutSessionRepository = {
@@ -25,13 +34,13 @@ export const activeWorkoutSessionRepository = {
     if (!result.ok || !result.data) {
       return null;
     }
-    
+
     // Convert date strings back to Date objects 
     const data = result.data;
     if (data.savedWorkoutSession && typeof data.savedWorkoutSession.date === 'string') {
       data.savedWorkoutSession.date = new Date(data.savedWorkoutSession.date);
     }
-    
+
     return data;
   },
 

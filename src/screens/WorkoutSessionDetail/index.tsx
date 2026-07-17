@@ -87,11 +87,12 @@ export const WorkoutSessionDetailScreen = () => {
     loadRoutine();
   }, [session.routineTemplateId]);
 
-  const getExerciseName = (templateId: string) => {
+  const getExerciseName = (exerciseLog: ExerciseLog) => {
+    if (exerciseLog.exerciseNameSnapshot) return exerciseLog.exerciseNameSnapshot;
     if (!routine) return "Exercício Desconhecido";
 
     for (const workout of routine.workouts) {
-      const exercise = workout.exercises.find(e => e.id === templateId);
+      const exercise = workout.exercises.find(e => e.id === exerciseLog.exerciseTemplateId);
       if (exercise) return exercise.name;
     }
 
@@ -151,7 +152,7 @@ export const WorkoutSessionDetailScreen = () => {
           <ExerciseItem
             key={`${exercise.exerciseTemplateId}-${index}`}
             exercise={exercise}
-            exerciseName={getExerciseName(exercise.exerciseTemplateId)}
+            exerciseName={getExerciseName(exercise)}
           />
         ))}
 

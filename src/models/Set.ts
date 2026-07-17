@@ -15,6 +15,7 @@ export interface SetTemplate {
 export interface SetLog {
 	id: string;
 	templateSetId?: string;
+	completedAt?: string;
 	reps: number;
 	weight: number;
 	failureType: FailureType;

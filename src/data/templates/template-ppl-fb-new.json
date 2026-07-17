@@ -1,0 +1,208 @@
+{
+  "id": "ppl-fb-new",
+  "name": "Rotina 26 fit Medianeira Novo",
+  "workouts": [
+    {
+      "id": "ppl-push",
+      "dayOfWeek": "MONDAY",
+      "description": "Push Day",
+      "exercises": [
+        {
+          "id": "ppl-push-e0",
+          "name": "Supino Reto Máquina",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Chest"
+        },
+        {
+          "id": "ppl-push-e1",
+          "name": "Crucifixo Reto Apoiado na polia",
+          "description": "Polia da Medianeira",
+          "muscleGroup": "Chest"
+        },
+        {
+          "id": "ppl-push-e3",
+          "name": "Crucifixo Polia Baixa Apoiado",
+          "description": "Polia da Medianeira",
+          "muscleGroup": "Chest"
+        },
+        {
+          "id": "ppl-push-e4",
+          "name": "Desenvolvimento no Smith",
+          "description": "",
+          "muscleGroup": "Shoulders"
+        },
+        {
+          "id": "ppl-push-e5",
+          "name": "Elevação Lateral Máquina Unilateral",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Shoulders"
+        },
+        {
+          "id": "ppl-push-e6",
+          "name": "Tríceps Polia Unilateral",
+          "description": "Polia da Medianeira",
+          "muscleGroup": "Triceps"
+        },
+        {
+          "id": "ppl-push-e7",
+          "name": "Panturrilha Sentado",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Calves"
+        }
+      ]
+    },
+    {
+      "id": "ppl-pull",
+      "dayOfWeek": "TUESDAY",
+      "description": "Pull Day",
+      "exercises": [
+        {
+          "id": "ppl-pull-e0",
+          "name": "Low Row Unilateral",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Back"
+        },
+        {
+          "id": "ppl-pull-e1",
+          "name": "Pulldown Corda Apoiado",
+          "description": "Polia da Medianeira",
+          "muscleGroup": "Back"
+        },
+        {
+          "id": "ppl-pull-e2",
+          "name": "Remada Horizontal Neutra",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Back"
+        },
+        {
+          "id": "ppl-pull-e3",
+          "name": "Posterior de Ombro no Voador Unilateral",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Shoulders"
+        },
+        {
+          "id": "ppl-pull-e4",
+          "name": "Rosca Martelo na Polia Unilateral",
+          "description": "Polia da Medianeira",
+          "muscleGroup": "Biceps"
+        },
+        {
+          "id": "ppl-pull-e5",
+          "name": "Rosca Punho com Halter",
+          "description": "",
+          "muscleGroup": "Forearms"
+        },
+        {
+          "id": "ppl-pull-e6",
+          "name": "Abdominal Polia",
+          "description": "Polia da Medianeira",
+          "muscleGroup": "Core"
+        }
+      ]
+    },
+    {
+      "id": "ppl-legs",
+      "dayOfWeek": "FRIDAY",
+      "description": "Leg Day",
+      "exercises": [
+        {
+          "id": "ppl-legs-e0",
+          "name": "Cadeira Extensora Simultanea",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Quads"
+        },
+        {
+          "id": "ppl-legs-e1",
+          "name": "Cadeira Flexora Simultanea",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Hamstrings"
+        },
+        {
+          "id": "ppl-legs-e2",
+          "name": "Leg Press",
+          "description": "Leg Press da Medianeira",
+          "muscleGroup": "Quads"
+        },
+        {
+          "id": "ppl-legs-e3",
+          "name": "Stiff no Belt Squat",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Hamstrings"
+        },
+        {
+          "id": "ppl-legs-e4",
+          "name": "Elevação Pélvica",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Glutes"
+        },
+        {
+          "id": "ppl-legs-e5",
+          "name": "Cadeira Adutora",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Adductors"
+        },
+        {
+          "id": "ppl-legs-e6",
+          "name": "Panturrilha em Pé Máquina",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Calves"
+        }
+      ]
+    },
+    {
+      "id": "ppl-fb",
+      "dayOfWeek": "SATURDAY",
+      "description": "Full Body",
+      "exercises": [
+        {
+          "id": "ppl-fb-e0",
+          "name": "Supino Inclinado no Smith",
+          "description": "Smith da Medianeira",
+          "muscleGroup": "Chest"
+        },
+        {
+          "id": "ppl-fb-e1",
+          "name": "High Row Com Manopla Unilateral",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Back"
+        },
+        {
+          "id": "ppl-fb-e2",
+          "name": "Remada Aberta",
+          "description": "",
+          "muscleGroup": "Back"
+        },
+        {
+          "id": "ppl-fb-e3",
+          "name": "Agachamento Hack",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Quads"
+        },
+        {
+          "id": "ppl-fb-e4",
+          "name": "Rosca Alternada Halter Inclinado",
+          "description": "",
+          "muscleGroup": "Biceps"
+        },
+        {
+          "id": "ppl-fb-e5",
+          "name": "Triceps Francês Halter Simultâneo",
+          "description": "",
+          "muscleGroup": "Triceps"
+        },
+        {
+          "id": "ppl-fb-e6",
+          "name": "Posterior de Ombro na Polia Diagonal",
+          "description": "Polia da Medianeira",
+          "muscleGroup": "Shoulders"
+        },
+        {
+          "id": "ppl-fb-e7",
+          "name": "Abdominal Infra na Torre",
+          "description": "",
+          "muscleGroup": "Core"
+        }
+      ]
+    }
+  ]
+}

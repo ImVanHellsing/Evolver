@@ -13,6 +13,12 @@ export interface WorkoutSession {
 	id: string;
 	routineTemplateId: string;
 	workoutTemplateId: string;
+	routineNameSnapshot?: string;
+	workoutDescriptionSnapshot?: string;
+	workoutDayOfWeekSnapshot?: DayOfWeek;
+	startedAt?: string;
+	completedAt?: string;
+	schemaVersion?: number;
 
 	exercises: ExerciseLog[];
 

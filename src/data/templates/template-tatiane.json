@@ -1,0 +1,196 @@
+{
+  "id": "upper-lower-2x",
+  "name": "Treino Upper & Lower 2x",
+  "workouts": [
+    {
+      "id": "upper-lower-lower-1",
+      "dayOfWeek": "TUESDAY",
+      "description": "Lower 1",
+      "exercises": [
+        {
+          "id": "upper-lower-lower-1-e0",
+          "name": "Abdução de Quadril",
+          "description": "3 séries: 15, 12 e 10 repetições",
+          "muscleGroup": "Glutes"
+        },
+        {
+          "id": "upper-lower-lower-1-e1",
+          "name": "Cadeira Flexora",
+          "description": "3 séries: 15, 12 e 10 repetições",
+          "muscleGroup": "Hamstrings"
+        },
+        {
+          "id": "upper-lower-lower-1-e2",
+          "name": "Agachamento no Smith",
+          "description": "3 séries: 12, 12 e 10 repetições",
+          "muscleGroup": "Quads"
+        },
+        {
+          "id": "upper-lower-lower-1-e3",
+          "name": "Mesa Flexora",
+          "description": "3 séries: 15, 12 e 10 repetições",
+          "muscleGroup": "Hamstrings"
+        },
+        {
+          "id": "upper-lower-lower-1-e4",
+          "name": "Agachamento Búlgaro",
+          "description": "1 série: entre 10 e 12 repetições",
+          "muscleGroup": "Glutes"
+        },
+        {
+          "id": "upper-lower-lower-1-e5",
+          "name": "Panturrilha no Leg Press",
+          "description": "3 séries: 15, 12 e 10 repetições",
+          "muscleGroup": "Calves"
+        },
+        {
+          "id": "upper-lower-lower-1-e6",
+          "name": "Rosca de Punho com Halter",
+          "description": "2 séries: 12 e 10 repetições",
+          "muscleGroup": "Forearms"
+        }
+      ]
+    },
+    {
+      "id": "upper-lower-upper-1",
+      "dayOfWeek": "THURSDAY",
+      "description": "Upper 1",
+      "exercises": [
+        {
+          "id": "upper-lower-upper-1-e0",
+          "name": "Voador",
+          "description": "3 séries: 15, 12 e 10 repetições",
+          "muscleGroup": "Chest"
+        },
+        {
+          "id": "upper-lower-upper-1-e1",
+          "name": "Puxador com Triângulo",
+          "description": "3 séries: 15, 12 e 10 repetições",
+          "muscleGroup": "Back"
+        },
+        {
+          "id": "upper-lower-upper-1-e2",
+          "name": "Remada Unilateral",
+          "description": "3 séries: 12, 10 e 8 repetições",
+          "muscleGroup": "Back"
+        },
+        {
+          "id": "upper-lower-upper-1-e3",
+          "name": "Elevação Lateral",
+          "description": "3 séries: 15, 12 e 10 repetições",
+          "muscleGroup": "Shoulders"
+        },
+        {
+          "id": "upper-lower-upper-1-e4",
+          "name": "Rosca Scott",
+          "description": "3 séries: 15, 12 e 10 repetições",
+          "muscleGroup": "Biceps"
+        },
+        {
+          "id": "upper-lower-upper-1-e5",
+          "name": "Tríceps Unilateral",
+          "description": "3 séries: 15, 12 e 10 repetições",
+          "muscleGroup": "Triceps"
+        }
+      ]
+    },
+    {
+      "id": "upper-lower-lower-2",
+      "dayOfWeek": "FRIDAY",
+      "description": "Lower 2",
+      "exercises": [
+        {
+          "id": "upper-lower-lower-2-e0",
+          "name": "Elevação de Quadril",
+          "description": "4 séries: 15, 12, 10 e 8 repetições",
+          "muscleGroup": "Glutes"
+        },
+        {
+          "id": "upper-lower-lower-2-e1",
+          "name": "Cadeira Extensora Unilateral",
+          "description": "3 séries: 15, 12 e 10 repetições",
+          "muscleGroup": "Quads"
+        },
+        {
+          "id": "upper-lower-lower-2-e2",
+          "name": "Coice na Polia ou Máquina",
+          "description": "2 séries: 12 e 10 repetições",
+          "muscleGroup": "Glutes"
+        },
+        {
+          "id": "upper-lower-lower-2-e3",
+          "name": "Leg Press",
+          "description": "2 séries: 12 e 10 repetições",
+          "muscleGroup": "Quads"
+        },
+        {
+          "id": "upper-lower-lower-2-e4",
+          "name": "Stiff",
+          "description": "2 séries: 15 e 10 repetições",
+          "muscleGroup": "Hamstrings"
+        },
+        {
+          "id": "upper-lower-lower-2-e5",
+          "name": "Panturrilha Sentado",
+          "description": "2 séries: 10 e 8 repetições",
+          "muscleGroup": "Calves"
+        },
+        {
+          "id": "upper-lower-lower-2-e6",
+          "name": "Extensora Lombar",
+          "description": "2 séries com o máximo de repetições possível",
+          "muscleGroup": "Core"
+        }
+      ]
+    },
+    {
+      "id": "upper-lower-upper-2",
+      "dayOfWeek": "SATURDAY",
+      "description": "Upper 2",
+      "exercises": [
+        {
+          "id": "upper-lower-upper-2-e0",
+          "name": "Supino Inclinado",
+          "description": "3 séries: 15, 12 e 10 repetições",
+          "muscleGroup": "Chest"
+        },
+        {
+          "id": "upper-lower-upper-2-e1",
+          "name": "Pulldown",
+          "description": "3 séries: 15, 12 e 10 repetições",
+          "muscleGroup": "Back"
+        },
+        {
+          "id": "upper-lower-upper-2-e2",
+          "name": "Voador Inverso",
+          "description": "3 séries: 15, 12 e 10 repetições",
+          "muscleGroup": "Shoulders"
+        },
+        {
+          "id": "upper-lower-upper-2-e3",
+          "name": "Desenvolvimento com Halteres",
+          "description": "3 séries: 12, 10 e 8 repetições",
+          "muscleGroup": "Shoulders"
+        },
+        {
+          "id": "upper-lower-upper-2-e4",
+          "name": "Rosca Martelo Alternada",
+          "description": "2 séries: 12 e 10 repetições",
+          "muscleGroup": "Biceps"
+        },
+        {
+          "id": "upper-lower-upper-2-e5",
+          "name": "Tríceps Francês",
+          "description": "2 séries: 12 e 10 repetições",
+          "muscleGroup": "Triceps"
+        },
+        {
+          "id": "upper-lower-upper-2-e6",
+          "name": "Abdominal na Máquina",
+          "description": "3 séries com o máximo de repetições possível",
+          "muscleGroup": "Core"
+        }
+      ]
+    }
+  ]
+}

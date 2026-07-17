@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 
 import { workoutSessionsRepository } from '../services/workouts/workoutSessionsRepository';
@@ -26,7 +26,10 @@ export function useHistory() {
       const historyData: HistoryItem[] = sessions.map(session => ({
         ...session,
         date: new Date(session.date),
-        routineName: routinesMap.get(session.routineTemplateId) || 'Rotina Desconhecida',
+        routineName:
+          session.routineNameSnapshot ||
+          routinesMap.get(session.routineTemplateId) ||
+          'Rotina Desconhecida',
       })).sort((a, b) => b.date.getTime() - a.date.getTime());
 
       setHistory(historyData);

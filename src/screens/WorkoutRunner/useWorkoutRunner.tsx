@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Vibration, Alert } from 'react-native';
 
 import { useAppNavigation } from '@/hooks/useAppNavigation';
@@ -11,7 +11,8 @@ import { FailureType } from '@/models/FailureType';
 import { workoutSessionsRepository } from '@/services/workouts/workoutSessionsRepository';
 import { activeWorkoutSessionRepository } from '@/services/workouts/activeWorkoutSessionRepository';
 import { routinesRepository } from '@/services/routines/routinesRepository';
-import { getIntelligentRestTime } from '@/utils/timerUtils';
+import { getIntelligentRestTime, getNextSetType } from '@/utils/timerUtils';
+import { createEntityId } from '@/utils/idUtils';
 
 export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemplate) => {
   const navigation = useAppNavigation();
@@ -46,43 +47,52 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
   const [timerEndTime, setTimerEndTime] = useState<number | null>(null);
 
   const [previousPerformance, setPreviousPerformance] = useState<{ weight: number; reps: number; failureType: FailureType } | null>(null);
-  const [personalRecord, setPersonalRecord] = useState<{ weight: number; reps: number } | null>(null);
+  const [personalRecord, setPersonalRecord] = useState<{
+    weight: number;
+    reps: number;
+    failureType?: FailureType;
+    type?: SetType;
+    date?: string;
+  } | null>(null);
 
   // Evolver 2.0: Tracking skipped exercises explicitly
   const [skippedExerciseIds, setSkippedExerciseIds] = useState<string[]>([]);
 
-  const [savedWorkoutSession, setSavedWorkoutSession] = useState<WorkoutSession>({
-    id: `workout-sessions-${new Date().toISOString()}`,
-    routineTemplateId: routineTemplateId,
-    workoutTemplateId: workout.id,
-    date: new Date(),
-    exercises: [],
+  // Dynamic rest time states
+  const [lastCompletedSetType, setLastCompletedSetType] = useState<SetType | null>(null);
+  const [lastCompletedSetTime, setLastCompletedSetTime] = useState<number | null>(null);
+  const [lastLoggedWeight, setLastLoggedWeight] = useState<number | null>(null);
+  const [lastLoggedReps, setLastLoggedReps] = useState<number | null>(null);
+
+  // Modal UX states
+  const [hasSelectedInitialSetType, setHasSelectedInitialSetType] = useState(false);
+  const [isChoosingNextAction, setIsChoosingNextAction] = useState(false);
+
+  const [savedWorkoutSession, setSavedWorkoutSession] = useState<WorkoutSession>(() => {
+    const startedAt = new Date().toISOString();
+    return {
+      id: createEntityId('session'),
+      routineTemplateId,
+      workoutTemplateId: workout.id,
+      workoutDescriptionSnapshot: workout.description,
+      workoutDayOfWeekSnapshot: workout.dayOfWeek,
+      startedAt,
+      schemaVersion: 2,
+      date: new Date(startedAt),
+      exercises: [],
+    };
   });
 
-  const loggedSetsForCurrentExercise = savedWorkoutSession.exercises.find(
-    ex => ex.exerciseTemplateId === currentExercise.id
-  )?.sets || [];
+  const loggedSetsForCurrentExercise = useMemo(
+    () => savedWorkoutSession.exercises.find(
+      ex => ex.exerciseTemplateId === currentExercise?.id
+    )?.sets || [],
+    [currentExercise?.id, savedWorkoutSession.exercises]
+  );
 
   // Suggest next set type automatically based on current logged sets
   const suggestNextSetType = (loggedSets: SetLog[]) => {
-    if (loggedSets.length === 0) {
-      setSelectedSetType(SetType.WarmUpSet);
-      return;
-    }
-    const lastSet = loggedSets[loggedSets.length - 1];
-    if (lastSet.type === SetType.WarmUpSet) {
-      const warmupCount = loggedSets.filter(s => s.type === SetType.WarmUpSet).length;
-      setSelectedSetType(warmupCount >= 2 ? SetType.RampUpSet : SetType.WarmUpSet);
-    } else if (lastSet.type === SetType.RampUpSet) {
-      setSelectedSetType(SetType.WorkSet);
-    } else if (lastSet.type === SetType.WorkSet) {
-      const workCount = loggedSets.filter(s => s.type === SetType.WorkSet).length;
-      setSelectedSetType(workCount >= 2 ? SetType.TopSet : SetType.WorkSet);
-    } else if (lastSet.type === SetType.TopSet) {
-      setSelectedSetType(SetType.BackoffSet);
-    } else if (lastSet.type === SetType.BackoffSet) {
-      setSelectedSetType(SetType.BackoffSet);
-    }
+    setSelectedSetType(getNextSetType(loggedSets));
   };
 
   // RESTORE SESSION
@@ -99,11 +109,29 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
           setIsResting(savedData.isResting);
           setTimerEndTime(savedData.timerEndTime);
           
-          if ((savedData as any).skippedExerciseIds) {
-            setSkippedExerciseIds((savedData as any).skippedExerciseIds);
+          if (savedData.skippedExerciseIds) {
+            setSkippedExerciseIds(savedData.skippedExerciseIds);
           }
-          if ((savedData as any).selectedSetType) {
-            setSelectedSetType((savedData as any).selectedSetType);
+          if (savedData.selectedSetType) {
+            setSelectedSetType(savedData.selectedSetType);
+          }
+          if (savedData.lastCompletedSetType) {
+            setLastCompletedSetType(savedData.lastCompletedSetType);
+          }
+          if (savedData.lastCompletedSetTime) {
+            setLastCompletedSetTime(savedData.lastCompletedSetTime);
+          }
+          if (savedData.lastLoggedWeight !== undefined) {
+            setLastLoggedWeight(savedData.lastLoggedWeight);
+          }
+          if (savedData.lastLoggedReps !== undefined) {
+            setLastLoggedReps(savedData.lastLoggedReps);
+          }
+          if (savedData.hasSelectedInitialSetType !== undefined) {
+            setHasSelectedInitialSetType(savedData.hasSelectedInitialSetType);
+          }
+          if (savedData.isChoosingNextAction !== undefined) {
+            setIsChoosingNextAction(savedData.isChoosingNextAction);
           }
         }
         hasRestoredSessionRef.current = true;
@@ -129,8 +157,14 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
         isResting,
         timerEndTime,
         skippedExerciseIds,
-        selectedSetType
-      } as any);
+        selectedSetType,
+        lastCompletedSetType,
+        lastCompletedSetTime,
+        lastLoggedWeight,
+        lastLoggedReps,
+        hasSelectedInitialSetType,
+        isChoosingNextAction
+      });
     }
   }, [
     savedWorkoutSession, 
@@ -144,16 +178,23 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     workout,
     skippedExerciseIds,
     selectedSetType,
+    lastCompletedSetType,
+    lastCompletedSetTime,
+    lastLoggedWeight,
+    lastLoggedReps,
+    hasSelectedInitialSetType,
+    isChoosingNextAction,
     loggedSetsForCurrentExercise.length
   ]);
 
   // FETCH HISTORICAL DATA
   useEffect(() => {
+    if (!currentExercise) return;
     const fetchHistory = async () => {
       const allSessions = await workoutSessionsRepository.list();
       
       // Sort by date desc
-      const sortedSessions = allSessions.sort((a, b) => 
+      const sortedSessions = [...allSessions].sort((a, b) =>
         new Date(b.date).getTime() - new Date(a.date).getTime()
       );
 
@@ -186,32 +227,55 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
         setPreviousPerformance(null);
       }
 
-      // Personal Record: highest weight lifted for this exercise across all sessions
-      let maxWeight = 0;
-      let maxReps = 0;
-
-      allSessions.forEach(session => {
-        session.exercises.forEach(ex => {
-          if (ex.exerciseTemplateId === currentExercise.id) {
-            ex.sets.forEach(set => {
-              if (set.weight > maxWeight || (set.weight === maxWeight && set.reps > maxReps)) {
-                maxWeight = set.weight;
-                maxReps = set.reps;
-              }
-            });
-          }
-        });
+      // Personal Record: highest intensity set from the most recent session
+      const lastSessionWithPR = sortedSessions.find(session => {
+        const ex = session.exercises.find(e => e.exerciseTemplateId === currentExercise.id);
+        return ex && ex.sets.length > 0;
       });
 
-      if (maxWeight > 0) {
-        setPersonalRecord({ weight: maxWeight, reps: maxReps });
+      if (lastSessionWithPR) {
+        const exerciseLog = lastSessionWithPR.exercises.find(
+          ex => ex.exerciseTemplateId === currentExercise.id
+        );
+        if (exerciseLog && exerciseLog.sets.length > 0) {
+          const topSets = exerciseLog.sets.filter(s => s.type === SetType.TopSet);
+          let prSet: SetLog;
+          if (topSets.length > 0) {
+            // Top Set has priority. Multiple Top Sets are invalid in normal use;
+            // if legacy data contains them, the last one performed wins.
+            prSet = topSets[topSets.length - 1];
+          } else {
+            // Priority 2: Highest weight. If tie, take the last one logged (using reduce)
+            prSet = exerciseLog.sets.reduce((max, s) => {
+              if (s.weight > max.weight) return s;
+              if (s.weight === max.weight) return s; // last one logged
+              return max;
+            }, exerciseLog.sets[0]);
+          }
+
+          setPersonalRecord({
+            weight: prSet.weight,
+            reps: prSet.reps,
+            failureType: prSet.failureType,
+            type: prSet.type,
+            date: new Date(lastSessionWithPR.date).toLocaleDateString('pt-BR'),
+          });
+        } else {
+          setPersonalRecord(null);
+        }
       } else {
         setPersonalRecord(null);
       }
     };
 
     fetchHistory();
-  }, [currentExercise.id, selectedSetType, loggedSetsForCurrentExercise.length]);
+  }, [currentExercise, loggedSetsForCurrentExercise, selectedSetType]);
+
+  // Reset exercise-specific guided states when navigation occurs
+  useEffect(() => {
+    setHasSelectedInitialSetType(false);
+    setIsChoosingNextAction(false);
+  }, [currentExerciseIndex]);
 
   const clearSetForm = () => {
     setWeight('');
@@ -234,25 +298,44 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     }
   }
 
-  const startRestTimer = () => {
-    const restSeconds = getIntelligentRestTime(
-      currentExercise.name,
-      currentExercise.muscleGroup,
-      selectedSetType
-    );
-
-    if (restSeconds > 0) {
-      setTimerEndTime(Date.now() + restSeconds * 1000);
-      setSecondsLeft(restSeconds);
-      setIsResting(true);
-    }
-  }
-
   const skipRest = () => {
     setIsResting(false);
     setSecondsLeft(0);
     setTimerEndTime(null);
+    setLastCompletedSetType(null);
+    setLastCompletedSetTime(null);
   }
+
+  // Dynamically update rest time when next set type changes during rest
+  useEffect(() => {
+    if (isResting && lastCompletedSetTime && lastCompletedSetType && currentExercise) {
+      const elapsedSeconds = Math.floor((Date.now() - lastCompletedSetTime) / 1000);
+      const totalRestSeconds = getIntelligentRestTime(
+        currentExercise.name,
+        currentExercise.muscleGroup,
+        lastCompletedSetType,
+        selectedSetType
+      );
+      const remaining = Math.max(0, totalRestSeconds - elapsedSeconds);
+
+      if (remaining > 0) {
+        setSecondsLeft(remaining);
+        setTimerEndTime(Date.now() + remaining * 1000);
+      } else {
+        setIsResting(false);
+        setSecondsLeft(0);
+        setTimerEndTime(null);
+        setLastCompletedSetType(null);
+        setLastCompletedSetTime(null);
+      }
+    }
+  }, [
+    currentExercise,
+    isResting,
+    lastCompletedSetTime,
+    lastCompletedSetType,
+    selectedSetType,
+  ]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (e) => {
@@ -304,6 +387,7 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
 
   const handleSaveDescription = async (newDescription: string) => {
     try {
+      if (!currentExercise) return;
       const routine = await routinesRepository.getById(routineTemplateId);
       if (!routine) return;
 
@@ -328,8 +412,13 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
   }
 
   const onFinishWorkout = async () => {
+    const routine = await routinesRepository.getById(routineTemplateId);
     const finalWorkoutSession: WorkoutSession = {
       ...savedWorkoutSession,
+      routineNameSnapshot: routine?.name ?? savedWorkoutSession.routineNameSnapshot,
+      workoutDescriptionSnapshot: currentWorkout.description,
+      workoutDayOfWeekSnapshot: currentWorkout.dayOfWeek,
+      completedAt: new Date().toISOString(),
       duration: Number(duration),
       caloriesEstimated: Number(calories),
     };
@@ -346,14 +435,24 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
   }
 
   const handleSaveNewSet = () => {
+    if (!currentExercise) return;
+    const completedType = selectedSetType;
+    const completedAt = new Date().toISOString();
+    const parsedWeight = Number(weight.replace(',', '.'));
     const newSetLog: SetLog = {
-      id: Date.now().toString(),
-      type: selectedSetType,
-      weight: Number(weight),
-      reps: Number(reps),
+      id: createEntityId('set_log'),
+      completedAt,
+      type: completedType,
+      weight: parsedWeight,
+      reps: Number.parseInt(reps, 10),
       failureType,
       notes: observation,
     };
+
+    setLastCompletedSetType(completedType);
+    setLastCompletedSetTime(Date.now());
+    setLastLoggedWeight(parsedWeight);
+    setLastLoggedReps(Number(reps));
 
     // Remove current exercise from skipped list if it was there
     if (skippedExerciseIds.includes(currentExercise.id)) {
@@ -375,34 +474,64 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
         const nextExercisesLog = [...prev.exercises];
         nextExercisesLog[existingIndex] = updatedExerciseLog;
 
-        const updatedSession = { ...prev, exercises: nextExercisesLog };
-        
-        // Auto-suggest next set type based on the newly saved sets
-        suggestNextSetType(updatedExerciseLog.sets);
-        
-        return updatedSession;
+        return { ...prev, exercises: nextExercisesLog };
       }
 
       // Add new exercise log holding the set
       const newExerciseLog: ExerciseLog = {
+        id: createEntityId('exercise_log'),
         exerciseTemplateId: currentExercise.id,
+        exerciseNameSnapshot: currentExercise.name,
         notes: observation,
         sets: [newSetLog],
       };
 
-      const updatedSession = { ...prev, exercises: [...prev.exercises, newExerciseLog] };
-      
-      // Auto-suggest next set type based on the newly saved sets
-      suggestNextSetType(newExerciseLog.sets);
-
-      return updatedSession;
+      return { ...prev, exercises: [...prev.exercises, newExerciseLog] };
     });
+
+    setIsChoosingNextAction(true);
   }
+
+  const onChooseNextAction = (actionType: 'set' | 'finish', nextType?: SetType) => {
+    if (actionType === 'set' && nextType) {
+      setSelectedSetType(nextType);
+      setIsChoosingNextAction(false);
+
+      // Start the rest timer using transition from lastCompletedSetType to nextType
+      if (lastCompletedSetType && currentExercise) {
+        const now = Date.now();
+        setLastCompletedSetTime(now);
+
+        const restSeconds = getIntelligentRestTime(
+          currentExercise.name,
+          currentExercise.muscleGroup,
+          lastCompletedSetType,
+          nextType
+        );
+
+        if (restSeconds > 0) {
+          setTimerEndTime(now + restSeconds * 1000);
+          setSecondsLeft(restSeconds);
+          setIsResting(true);
+        }
+      }
+    } else if (actionType === 'finish') {
+      setIsChoosingNextAction(false);
+      onNextExercisePressed();
+    }
+  };
+
+  const selectInitialSetType = (type: SetType) => {
+    setSelectedSetType(type);
+    setHasSelectedInitialSetType(true);
+  };
 
   const onSaveSetPressed = () => {
     handleSaveNewSet();
-    startRestTimer();
-    clearSetForm();
+    // Keep the latest load ready for the next set of this exercise.
+    setReps('');
+    setObservation('');
+    setFailureType(FailureType.REMAINING_REPS);
   }
 
   const exText = `Exercício ${currentExerciseIndex + 1}/${workout.exercises.length}`;
@@ -438,6 +567,7 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
   };
 
   const onSkipExercisePressed = () => {
+    if (!currentExercise) return;
     const loggedSets = savedWorkoutSession.exercises.find(
       ex => ex.exerciseTemplateId === currentExercise.id
     )?.sets || [];
@@ -526,5 +656,17 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
       setIsMissingModalVisible(false);
       setIsFinishModalVisible(true);
     },
+
+    // Guided UX properties
+    hasSelectedInitialSetType,
+    setHasSelectedInitialSetType,
+    selectInitialSetType,
+    isChoosingNextAction,
+    setIsChoosingNextAction,
+    lastLoggedWeight,
+    lastLoggedReps,
+    lastCompletedSetType,
+    onChooseNextAction,
+    getNextSetType,
   };
 }

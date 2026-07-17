@@ -9,6 +9,46 @@ export const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 80,
+  },
+  emptyScrollContent: {
+    justifyContent: 'center',
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingBottom: 48,
+  },
+  emptyIconContainer: {
+    width: 72,
+    height: 72,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 18,
+    borderRadius: 36,
+    backgroundColor: '#E8E8EB',
+  },
+  emptyIcon: {
+    color: '#1C1C1E',
+    fontSize: 36,
+    fontWeight: '300',
+  },
+  emptyTitle: {
+    color: '#1C1C1E',
+    fontSize: 21,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  emptyDescription: {
+    maxWidth: 320,
+    color: '#8E8E93',
+    fontSize: 15,
+    lineHeight: 22,
+    marginTop: 8,
+    textAlign: 'center',
+  },
   innerContainerRow: {
     flexDirection: 'row',
     alignItems: 'center',

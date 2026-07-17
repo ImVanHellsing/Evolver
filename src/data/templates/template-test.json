@@ -1,0 +1,25 @@
+{  
+    "id": "ppl-test",
+    "name": "Rotina Teste",
+    "workouts": [
+      {
+        "id": "ppl-push",
+        "dayOfWeek": "MONDAY",
+        "description": "Push Day",
+        "exercises": [
+          {
+            "id": "ppl-push-e0",
+            "name": "Supino Reto Máquina",
+            "description": "Máquina da Vincent",
+            "muscleGroup": "Chest"
+          },
+          {
+            "id": "ppl-push-e1",
+            "name": "Voador",
+            "description": "Voador da Vincent",
+            "muscleGroup": "Chest"
+          }
+        ]
+      }
+    ]
+}

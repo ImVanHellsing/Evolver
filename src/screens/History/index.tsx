@@ -10,7 +10,11 @@ import { DayOfWeek, DAY_OF_WEEK_ORDER, getDayOfWeekMessage } from '../../models/
 
 import { styles } from './styles';
 
-export function HistoryScreen() {
+interface HistoryScreenProps {
+  showBackButton?: boolean;
+}
+
+export function HistoryScreen({ showBackButton = true }: HistoryScreenProps) {
   const navigation = useAppNavigation();
 
   const { history, isLoading, deleteAllHistory } = useHistory();
@@ -118,7 +122,7 @@ export function HistoryScreen() {
 
   return (
     <View style={styles.container}>
-      <Header title="Histórico" showBackButton />
+      <Header title="Histórico" showBackButton={showBackButton} />
 
       {isLoading ? (
         <View style={styles.centered}>

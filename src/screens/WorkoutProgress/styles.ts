@@ -27,6 +27,17 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '500',
   },
+  positionSection: {
+    marginBottom: 4,
+  },
+  positionLabel: {
+    color: '#636366',
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 8,
+    marginLeft: 4,
+    textTransform: 'uppercase',
+  },
   exerciseCard: {
     backgroundColor: '#FFF',
     borderRadius: 16,
@@ -39,10 +50,45 @@ export const styles = StyleSheet.create({
     elevation: 2,
   },
   exerciseName: {
+    flex: 1,
     fontSize: 18,
     fontWeight: 'bold',
     color: '#1C1C1E',
     marginBottom: 16,
+  },
+  exerciseTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+  },
+  changeBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    backgroundColor: '#F2F2F7',
+  },
+  changeBadgeAdded: {
+    backgroundColor: '#E8F8EC',
+  },
+  changeBadgeRemoved: {
+    backgroundColor: '#FDECEA',
+  },
+  changeBadgeText: {
+    color: '#636366',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  changeBadgeTextAdded: {
+    color: '#248A3D',
+  },
+  changeBadgeTextRemoved: {
+    color: '#D70015',
+  },
+  recordLabel: {
+    color: '#8E8E93',
+    fontSize: 13,
+    marginTop: -8,
+    marginBottom: 8,
   },
   setsHeader: {
     flexDirection: 'row',
@@ -57,10 +103,30 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
     textTransform: 'uppercase',
   },
+  setNumberHeader: {
+    flex: 0.5,
+  },
+  previousHeader: {
+    flex: 1.5,
+  },
+  currentHeader: {
+    flex: 1,
+  },
+  statusHeader: {
+    flex: 1,
+  },
   setRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F2F2F7',
+  },
+  standaloneSetRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#F2F2F7',
   },
@@ -89,6 +155,11 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     color: '#C7C7CC',
   },
+  noValidSetsText: {
+    color: '#8E8E93',
+    fontSize: 14,
+    paddingVertical: 8,
+  },
   statusBox: {
     flex: 1,
     alignItems: 'center',
@@ -99,6 +170,15 @@ export const styles = StyleSheet.create({
     borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  statusEvolution: {
+    backgroundColor: '#34C759',
+  },
+  statusStagnation: {
+    backgroundColor: '#AFABB3',
+  },
+  statusInvolution: {
+    backgroundColor: '#FF3B30',
   },
   statusIcon: {
     color: '#FFF',
@@ -148,37 +228,5 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     color: '#8E8E93',
     fontWeight: '500',
-  },
-  statsRow: {
-    flexDirection: 'row',
-    backgroundColor: '#FFF',
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  statsItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statsDivider: {
-    width: 1,
-    backgroundColor: '#F2F2F7',
-    marginHorizontal: 8,
-  },
-  statsLabel: {
-    fontSize: 11,
-    color: '#8E8E93',
-    textTransform: 'uppercase',
-    marginBottom: 4,
-  },
-  statsValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#1C1C1E',
   },
 });

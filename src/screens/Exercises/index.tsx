@@ -20,7 +20,9 @@ export const ExercisesScreen = () => {
   const { routineTemplateId, workout } = useAppRouteParams<'Exercises'>();
 
   const [currentWorkout, setCurrentWorkout] = useState(workout);
-  const [selectedExercise, setSelectedExercise] = useState<ExerciseTemplate>(currentWorkout.exercises[0]);
+  const [selectedExercise, setSelectedExercise] = useState<ExerciseTemplate | null>(
+    currentWorkout.exercises[0] ?? null
+  );
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   
   const [isEditDescriptionModalVisible, setIsEditDescriptionModalVisible] = useState(false);
@@ -29,6 +31,7 @@ export const ExercisesScreen = () => {
   const [isEditWorkoutModalVisible, setIsEditWorkoutModalVisible] = useState(false);
 
   const onRunWorkoutPressed = () => {
+    if (currentWorkout.exercises.length === 0) return;
     navigation.navigate('WorkoutRunner', { routineTemplateId, workout: currentWorkout });
   }
 
@@ -103,9 +106,11 @@ export const ExercisesScreen = () => {
   const renderActionButtons = () => {
     return (
       <>
-        <Pressable style={styles.fabRunWorkout} onPress={onRunWorkoutPressed}>
-          <Text style={styles.fabIcon}>🏋️</Text>
-        </Pressable>
+        {currentWorkout.exercises.length > 0 ? (
+          <Pressable style={styles.fabRunWorkout} onPress={onRunWorkoutPressed}>
+            <Text style={styles.fabIcon}>🏋️</Text>
+          </Pressable>
+        ) : null}
         <Pressable style={styles.fab} onPress={onEditWorkoutPressed}>
           <Text style={styles.fabIcon}>✏️</Text>
         </Pressable>
@@ -118,13 +123,20 @@ export const ExercisesScreen = () => {
       <Header title="Exercícios" showBackButton />
       <ScrollView 
         style={styles.innerContainer} 
-        contentContainerStyle={{ paddingBottom: 80 }}
+        contentContainerStyle={[
+          styles.scrollContent,
+          currentWorkout.exercises.length === 0 && styles.emptyScrollContent,
+        ]}
         showsVerticalScrollIndicator={false}
       >
         {currentWorkout.exercises.length === 0 ? (
-          <View style={{ padding: 24, alignItems: 'center' }}>
-            <Text style={{ fontSize: 16, color: '#8E8E93', textAlign: 'center' }}>
-              Nenhum exercício cadastrado para este treino.
+          <View style={styles.emptyState}>
+            <View style={styles.emptyIconContainer}>
+              <Text style={styles.emptyIcon}>＋</Text>
+            </View>
+            <Text style={styles.emptyTitle}>Nenhum exercício adicionado</Text>
+            <Text style={styles.emptyDescription}>
+              Este treino foi criado sem exercícios. Você poderá montar a lista de exercícios posteriormente.
             </Text>
           </View>
         ) : (
@@ -141,11 +153,13 @@ export const ExercisesScreen = () => {
 
       {renderActionButtons()}
 
-      <ExerciseDetailsBottomSheet
-        exercise={selectedExercise}
-        isVisible={isBottomSheetVisible}
-        onClose={() => setIsBottomSheetVisible(false)}
-      />
+      {selectedExercise ? (
+        <ExerciseDetailsBottomSheet
+          exercise={selectedExercise}
+          isVisible={isBottomSheetVisible}
+          onClose={() => setIsBottomSheetVisible(false)}
+        />
+      ) : null}
 
       {editingExercise && (
         <EditDescriptionModal

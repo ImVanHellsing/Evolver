@@ -10,7 +10,9 @@ export interface ExerciseTemplate {
 }
 
 export interface ExerciseLog {
+	id?: string;
 	exerciseTemplateId: string;
+	exerciseNameSnapshot?: string;
 	notes: string;
 	sets: SetLog[];
 }

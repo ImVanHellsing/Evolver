@@ -1,39 +1,40 @@
-import { useState, useMemo, useCallback } from "react";
-import { Text, View, Pressable, Modal, ScrollView, Alert } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
+import { useCallback, useState } from 'react';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
-import { useAppRouteParams } from "@/hooks/useAppRouteParams";
-import { Header } from "@/components/Header";
-import { ExerciseTemplate } from "@/models/Exercise";
-import { useNavigation } from "@react-navigation/native";
-import { Routes } from "@/app/navigation/routes";
-import { getWorkoutAmountOfValidSets, WorkoutTemplate } from "@/models/Workout";
-import { SetType } from "@/models/SetType";
-import { getMuscleGroupTranslate, MuscleGroup } from "@/models/MuscleGroup";
-import { getDayOfWeekMessage, DayOfWeek } from "@/models/DayOfWeek";
-import { useWorkouts } from "./useWorkouts";
-import { routinesRepository } from "@/services/routines/routinesRepository";
-import { CreateWorkoutModal } from "@/components/CreateWorkoutModal";
+import { Header } from '@/components/Header';
+import { CreateWorkoutModal } from '@/components/CreateWorkoutModal';
+import { EditWorkoutModal } from '@/components/EditWorkoutModal';
+import { Routes } from '@/app/navigation/routes';
+import { useAppRouteParams } from '@/hooks/useAppRouteParams';
+import { ExerciseTemplate } from '@/models/Exercise';
+import { DayOfWeek, getDayOfWeekMessage } from '@/models/DayOfWeek';
+import { WorkoutSession, WorkoutTemplate } from '@/models/Workout';
+import { routinesRepository } from '@/services/routines/routinesRepository';
+import { createEntityId } from '@/utils/idUtils';
 
-import { styles } from "./styles";
+import { styles } from './styles';
+import { useWorkouts } from './useWorkouts';
 
 const MAX_EXERCISES_RESUMED_LIST = 2;
 
+interface AddWorkoutButtonProps {
+  onPress: () => void;
+}
+
+const AddWorkoutButton = ({ onPress }: AddWorkoutButtonProps) => (
+  <Pressable accessibilityRole="button" style={styles.addWorkoutButton} onPress={onPress}>
+    <Text style={styles.addWorkoutIcon}>＋</Text>
+    <Text style={styles.addWorkoutText}>Adicionar treino</Text>
+  </Pressable>
+);
+
 export const WorkoutScreen = () => {
   const navigation = useNavigation();
-
   const { routine } = useAppRouteParams<'Workouts'>();
-
-  const [isVolumeModalVisible, setVolumeModalVisible] = useState(false);
-  const [isCreateModalVisible, setCreateModalVisible] = useState(false);
   const [currentRoutine, setCurrentRoutine] = useState(routine);
-
-  const refreshRoutine = async () => {
-    const updatedRoutine = await routinesRepository.getById(routine.id);
-    if (updatedRoutine) {
-      setCurrentRoutine(updatedRoutine);
-    }
-  };
+  const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+  const [editingWorkout, setEditingWorkout] = useState<WorkoutTemplate | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -60,149 +61,180 @@ export const WorkoutScreen = () => {
   });
 
   const onWorkoutPressed = (workout: WorkoutTemplate) => {
-    navigation.navigate(Routes.Exercises, { routineTemplateId: currentRoutine.id, workout });
-  }
+    navigation.navigate(Routes.Exercises, {
+      routineTemplateId: currentRoutine.id,
+      workout,
+    });
+  };
 
-  const onWorkoutLongPressed = (lastSession: import("@/models/Workout").WorkoutSession | null) => {
+  const onWorkoutLongPressed = (lastSession: WorkoutSession | null) => {
     if (lastSession) {
       navigation.navigate(Routes.WorkoutSessionDetail as any, { session: lastSession });
     } else {
       Alert.alert('Sem sessões', 'Não há sessões anteriores para este treino.');
     }
-  }
+  };
 
   const handleCreateWorkout = async (dayOfWeek: DayOfWeek, description: string) => {
-    const newWorkout: WorkoutTemplate = {
-      id: `workout-${Date.now()}`,
-      dayOfWeek,
-      description,
-      exercises: [],
-    };
-    const updatedRoutine = {
-      ...currentRoutine,
-      workouts: [...currentRoutine.workouts, newWorkout],
-    };
-    await routinesRepository.save(updatedRoutine);
-    setCurrentRoutine(updatedRoutine);
-    setCreateModalVisible(false);
+    try {
+      const newWorkout: WorkoutTemplate = {
+        id: createEntityId('workout'),
+        dayOfWeek,
+        description,
+        exercises: [],
+      };
+      const updatedRoutine = {
+        ...currentRoutine,
+        workouts: [...currentRoutine.workouts, newWorkout],
+      };
+
+      await routinesRepository.save(updatedRoutine);
+      setCurrentRoutine(updatedRoutine);
+      setIsCreateModalVisible(false);
+    } catch (error) {
+      console.error('[WorkoutScreen.handleCreateWorkout]', error);
+      Alert.alert('Erro', 'Não foi possível adicionar o treino. Tente novamente.');
+    }
+  };
+
+  const handleEditWorkout = async (dayOfWeek: DayOfWeek, description: string) => {
+    if (!editingWorkout) return;
+
+    try {
+      const updatedRoutine = {
+        ...currentRoutine,
+        workouts: currentRoutine.workouts.map(workout =>
+          workout.id === editingWorkout.id
+            ? { ...workout, dayOfWeek, description }
+            : workout
+        ),
+      };
+
+      await routinesRepository.save(updatedRoutine);
+      setCurrentRoutine(updatedRoutine);
+      setEditingWorkout(null);
+    } catch (error) {
+      console.error('[WorkoutScreen.handleEditWorkout]', error);
+      Alert.alert('Erro', 'Não foi possível salvar as alterações do treino.');
+    }
   };
 
   const getExercisesResumedList = (exercises: ExerciseTemplate[]) => {
-    const filteredExercises = exercises.filter((_, index) => index < MAX_EXERCISES_RESUMED_LIST);
-    if (filteredExercises.length === 0) return 'Sem exercícios cadastrados';
-    return `${filteredExercises.map((exercise, index) => {
-      return `${index > 0 ? ' - ' : ''}${exercise.name}`;
-    }).join('')}${exercises.length > MAX_EXERCISES_RESUMED_LIST ? '...' : ''}`
-  }
+    const resumedExercises = exercises.slice(0, MAX_EXERCISES_RESUMED_LIST);
+    if (resumedExercises.length === 0) return 'Sem exercícios cadastrados';
 
-  const volumeSummary = useMemo(() => {
-    const summary: Record<string, number> = {};
+    const names = resumedExercises.map(exercise => exercise.name).join(' - ');
+    return `${names}${exercises.length > MAX_EXERCISES_RESUMED_LIST ? '...' : ''}`;
+  };
 
-    currentRoutine.workouts.forEach(workout => {
-      workout.exercises.forEach(exercise => {
-        const validSets = (exercise.sets || []).filter(set =>
-          set.type === SetType.WorkSet || set.type === SetType.TopSet
-        ).length;
-
-        if (validSets > 0) {
-          const muscle = exercise.muscleGroup;
-          summary[muscle] = (summary[muscle] || 0) + validSets;
-        }
-      });
-    });
-
-    return Object.entries(summary)
-      .map(([muscle, count]) => ({
-        muscle: muscle as MuscleGroup,
-        count
-      }))
-      .sort((a, b) => b.count - a.count);
-  }, [currentRoutine]);
+  const hasWorkouts = workoutsWithLastSession.length > 0;
 
   return (
     <View style={styles.container}>
       <Header title={currentRoutine.name} showBackButton />
       <View style={styles.innerContainer}>
-        <Text style={styles.hint}>Pressione para ver os detalhes de um treino</Text>
-        <Pressable style={styles.summaryButton} onPress={() => setVolumeModalVisible(true)}>
-          <Text style={styles.summaryButtonText}>📊 Ver Resumo de Volume</Text>
-        </Pressable>
-
         <Text style={styles.title}>Treinos</Text>
-        <ScrollView 
-          contentContainerStyle={{ paddingBottom: 80 }}
+        {hasWorkouts ? (
+          <Text style={styles.hint}>Toque para ver os detalhes de um treino</Text>
+        ) : null}
+
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
+            !hasWorkouts && styles.emptyScrollContent,
+          ]}
           showsVerticalScrollIndicator={false}
         >
-          {workoutsWithLastSession.map(({ workout, lastSession }) => (
-            <Pressable
-              key={workout.id}
-              style={styles.bigButton}
-              onPress={() => onWorkoutPressed(workout)}
-              onLongPress={() => onWorkoutLongPressed(lastSession)}
-            >
-              <Text style={styles.bigButtonTitle}>{getDayOfWeekMessage(workout.dayOfWeek)}</Text>
-              <Text style={styles.bigButtonDesc}>{workout.description}</Text>
-              <Text style={styles.bigButtonDesc}>{workout.exercises.length} exercícios</Text>
-              <Text style={styles.bigButtonDesc}>{getExercisesResumedList(workout.exercises)}</Text>
-
-              {!!lastSession && (
-                <>
-                  <Text style={styles.bigButtonDesc}>
-                    Última sessão: {new Date((lastSession as any).endedAt ?? (lastSession as any).startedAt ?? (lastSession as any).date).toLocaleDateString()}
+          {hasWorkouts ? (
+            <>
+              {workoutsWithLastSession.map(({ workout, lastSession }) => (
+                <Pressable
+                  key={workout.id}
+                  style={styles.workoutCard}
+                  onPress={() => onWorkoutPressed(workout)}
+                  onLongPress={() => onWorkoutLongPressed(lastSession)}
+                >
+                  <View style={styles.workoutCardHeader}>
+                    <Text style={styles.workoutCardTitle}>
+                      {getDayOfWeekMessage(workout.dayOfWeek)}
+                    </Text>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={`Editar ${workout.description}`}
+                      hitSlop={8}
+                      style={styles.editWorkoutButton}
+                      onPress={event => {
+                        event.stopPropagation();
+                        setEditingWorkout(workout);
+                      }}
+                    >
+                      <Text style={styles.editWorkoutIcon}>✏️</Text>
+                    </Pressable>
+                  </View>
+                  <Text style={styles.workoutCardDescription}>{workout.description}</Text>
+                  <Text style={styles.workoutCardDescription}>
+                    {workout.exercises.length} exercícios
+                  </Text>
+                  <Text style={styles.workoutCardDescription}>
+                    {getExercisesResumedList(workout.exercises)}
                   </Text>
 
-                  {!!lastSession.duration && (
-                    <Text style={styles.bigButtonDesc}>Duração: {Math.round(lastSession.duration)} min</Text>
+                  {lastSession ? (
+                    <>
+                      <Text style={styles.workoutCardDescription}>
+                        Última sessão:{' '}
+                        {new Date(
+                          (lastSession as any).endedAt ??
+                          (lastSession as any).startedAt ??
+                          lastSession.date
+                        ).toLocaleDateString()}
+                      </Text>
+                      {lastSession.duration ? (
+                        <Text style={styles.workoutCardDescription}>
+                          Duração: {Math.round(lastSession.duration)} min
+                        </Text>
+                      ) : null}
+                      {typeof lastSession.caloriesEstimated === 'number' ? (
+                        <Text style={styles.workoutCardDescription}>
+                          Calorias: {Math.round(lastSession.caloriesEstimated)} kcal
+                        </Text>
+                      ) : null}
+                    </>
+                  ) : (
+                    <Text style={styles.workoutCardDescription}>Não iniciado ainda</Text>
                   )}
-
-                  {typeof lastSession.caloriesEstimated === 'number' && (
-                    <Text style={styles.bigButtonDesc}>Calorias: {Math.round(lastSession.caloriesEstimated)} kcal</Text>
-                  )}
-                </>
-              )}
-
-              {!lastSession && (
-                <Text style={styles.bigButtonDesc}>Não iniciado ainda</Text>
-              )}
-            </Pressable>
-          ))}
+                </Pressable>
+              ))}
+              <AddWorkoutButton onPress={() => setIsCreateModalVisible(true)} />
+            </>
+          ) : (
+            <View style={styles.emptyState}>
+              <View style={styles.emptyIconContainer}>
+                <Text style={styles.emptyIcon}>＋</Text>
+              </View>
+              <Text style={styles.emptyTitle}>Nenhum treino adicionado</Text>
+              <Text style={styles.emptyDescription}>
+                Adicione o primeiro treino desta rotina para começar a organizar seus exercícios.
+              </Text>
+              <AddWorkoutButton onPress={() => setIsCreateModalVisible(true)} />
+            </View>
+          )}
         </ScrollView>
       </View>
-
-      <Pressable style={styles.fab} onPress={() => setCreateModalVisible(true)}>
-        <Text style={styles.fabIcon}>+</Text>
-      </Pressable>
-
       <CreateWorkoutModal
         visible={isCreateModalVisible}
         onSave={handleCreateWorkout}
-        onCancel={() => setCreateModalVisible(false)}
+        onCancel={() => setIsCreateModalVisible(false)}
       />
-
-      <Modal
-        visible={isVolumeModalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setVolumeModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <Pressable style={{ flex: 1 }} onPress={() => setVolumeModalVisible(false)} />
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Volume por Grupamento</Text>
-            <ScrollView>
-              {volumeSummary.map((item) => (
-                <View key={item.muscle} style={styles.volumeItem}>
-                  <Text style={styles.volumeMuscle}>{getMuscleGroupTranslate(item.muscle)}</Text>
-                  <Text style={styles.volumeCount}>{item.count} séries</Text>
-                </View>
-              ))}
-            </ScrollView>
-            <Pressable style={styles.closeButton} onPress={() => setVolumeModalVisible(false)}>
-              <Text style={styles.closeButtonText}>Fechar</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
+      {editingWorkout ? (
+        <EditWorkoutModal
+          visible
+          initialDayOfWeek={editingWorkout.dayOfWeek}
+          initialDescription={editingWorkout.description}
+          onSave={handleEditWorkout}
+          onCancel={() => setEditingWorkout(null)}
+        />
+      ) : null}
     </View>
   );
-}
+};
