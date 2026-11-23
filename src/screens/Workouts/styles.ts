@@ -9,10 +9,19 @@ export const styles = StyleSheet.create({
     marginTop: 5, marginBottom: 16,
   },
   scrollContent: { paddingBottom: 100 },
-  daySlot: { marginBottom: 16 },
+  daySlot: {
+    position: 'relative',
+    zIndex: 0,
+    overflow: 'visible',
+    marginBottom: 16,
+  },
   daySlotEditing: {
     minHeight: 104, padding: 8, borderWidth: 1, borderColor: '#D1D1D6',
     borderRadius: 14, backgroundColor: '#ECECF0',
+  },
+  daySlotDragging: {
+    zIndex: 100,
+    elevation: 20,
   },
   dayLabel: {
     color: '#636366', fontSize: 13, fontWeight: '800', letterSpacing: 0.4,

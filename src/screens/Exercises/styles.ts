@@ -138,6 +138,7 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     marginTop: 8,
+    marginBottom: 24,
     textAlign: 'center',
   },
   innerContainerRow: {

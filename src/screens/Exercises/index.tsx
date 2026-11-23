@@ -5,24 +5,24 @@ import { useAppRouteParams } from "@/hooks/useAppRouteParams";
 import { Header } from "@/components/Header";
 import { ExerciseTemplate } from "@/models/Exercise";
 import { ExerciseResumeDemonstration } from "@/components/ExerciseResumeDemonstration";
+import { CreateExerciseModal } from "@/components/CreateExerciseModal";
 import { EditDescriptionModal } from "@/components/EditDescriptionModal";
 import { EditWorkoutModal } from "@/components/EditWorkoutModal";
 import { useAppNavigation } from "@/hooks/useAppNavigation";
 import { routinesRepository } from "@/services/routines/routinesRepository";
 import { DayOfWeek, getDayOfWeekMessage } from "@/models/DayOfWeek";
+import { MuscleGroup } from "@/models/MuscleGroup";
+import { createEntityId } from "@/utils/idUtils";
 
 import { styles } from "./styles";
 
 const REORDER_ITEM_HEIGHT = 94;
 
-const AddExerciseButton = () => (
+const AddExerciseButton = ({ onPress }: { onPress: () => void }) => (
   <Pressable
     accessibilityRole="button"
     style={styles.addExerciseButton}
-    onPress={() => Alert.alert(
-      'Funcionalidade indisponível',
-      'A adição de exercícios estará disponível em uma próxima atualização.'
-    )}
+    onPress={onPress}
   >
     <Text style={styles.addExerciseIcon}>＋</Text>
     <Text style={styles.addExerciseText}>Adicionar exercício</Text>
@@ -39,6 +39,11 @@ export const reorderExercise = (
   next.splice(toIndex, 0, moved);
   return next;
 };
+
+export const appendExercise = (
+  exercises: ExerciseTemplate[],
+  exercise: ExerciseTemplate
+) => [...exercises, exercise];
 
 interface ReorderableExerciseProps {
   exercise: ExerciseTemplate;
@@ -120,6 +125,7 @@ export const ExercisesScreen = () => {
   const [editingExercise, setEditingExercise] = useState<ExerciseTemplate | null>(null);
 
   const [isEditWorkoutModalVisible, setIsEditWorkoutModalVisible] = useState(false);
+  const [isCreateExerciseModalVisible, setIsCreateExerciseModalVisible] = useState(false);
   const [isReordering, setIsReordering] = useState(false);
   const [draftExercises, setDraftExercises] = useState<ExerciseTemplate[]>(workout.exercises);
 
@@ -176,6 +182,40 @@ export const ExercisesScreen = () => {
 
   const moveExercise = (fromIndex: number, toIndex: number) => {
     setDraftExercises(items => reorderExercise(items, fromIndex, toIndex));
+  };
+
+  const handleCreateExercise = async (
+    name: string,
+    muscleGroup: MuscleGroup,
+    description: string
+  ) => {
+    try {
+      const routine = await routinesRepository.getById(routineTemplateId);
+      if (!routine) return false;
+
+      const workoutIndex = routine.workouts.findIndex(item => item.id === currentWorkout.id);
+      if (workoutIndex === -1) return false;
+
+      const newExercise: ExerciseTemplate = {
+        id: createEntityId('exercise'),
+        name,
+        muscleGroup,
+        description,
+      };
+      routine.workouts[workoutIndex].exercises = appendExercise(
+        routine.workouts[workoutIndex].exercises,
+        newExercise
+      );
+
+      await routinesRepository.save(routine);
+      setCurrentWorkout(routine.workouts[workoutIndex]);
+      setIsCreateExerciseModalVisible(false);
+      return true;
+    } catch (error) {
+      console.error('[ExercisesScreen.handleCreateExercise]', error);
+      Alert.alert('Erro', 'Não foi possível adicionar o exercício. Tente novamente.');
+      return false;
+    }
   };
 
   const handleEditWorkout = async (dayOfWeek: DayOfWeek, description: string) => {
@@ -320,7 +360,9 @@ export const ExercisesScreen = () => {
                 ? 'Reverta as alterações ou salve para manter este treino sem exercícios.'
                 : 'Este treino foi criado sem exercícios. Você poderá montar a lista de exercícios posteriormente.'}
             </Text>
-            {!isReordering ? <AddExerciseButton /> : null}
+            {!isReordering ? (
+              <AddExerciseButton onPress={() => setIsCreateExerciseModalVisible(true)} />
+            ) : null}
           </View>
         ) : (
           <>
@@ -340,7 +382,9 @@ export const ExercisesScreen = () => {
                 onEditDescription={onEditDescriptionPressed}
               />
             ))}
-            {!isReordering ? <AddExerciseButton /> : null}
+            {!isReordering ? (
+              <AddExerciseButton onPress={() => setIsCreateExerciseModalVisible(true)} />
+            ) : null}
           </>
         )}
       </ScrollView>
@@ -358,6 +402,12 @@ export const ExercisesScreen = () => {
           }}
         />
       )}
+
+      <CreateExerciseModal
+        visible={isCreateExerciseModalVisible}
+        onSave={handleCreateExercise}
+        onCancel={() => setIsCreateExerciseModalVisible(false)}
+      />
 
       <EditWorkoutModal
         visible={isEditWorkoutModalVisible}

@@ -23,23 +23,32 @@ interface DraggableWorkoutProps {
   workout: WorkoutTemplate;
   onDragStart: () => void;
   onDrop: (workoutId: string, screenY: number) => void;
+  onDragStateChange: (workoutId: string | null) => void;
 }
 
-const DraggableWorkout = ({ workout, onDragStart, onDrop }: DraggableWorkoutProps) => {
+const DraggableWorkout = ({
+  workout,
+  onDragStart,
+  onDrop,
+  onDragStateChange,
+}: DraggableWorkoutProps) => {
   const translateY = useRef(new Animated.Value(0)).current;
   const [isDragging, setIsDragging] = useState(false);
   const workoutIdRef = useRef(workout.id);
   const onDragStartRef = useRef(onDragStart);
   const onDropRef = useRef(onDrop);
+  const onDragStateChangeRef = useRef(onDragStateChange);
 
   workoutIdRef.current = workout.id;
   onDragStartRef.current = onDragStart;
   onDropRef.current = onDrop;
+  onDragStateChangeRef.current = onDragStateChange;
 
   const finishDrag = (screenY: number) => {
     translateY.setValue(0);
     setIsDragging(false);
     if (screenY > 0) onDropRef.current(workoutIdRef.current, screenY);
+    onDragStateChangeRef.current(null);
   };
 
   const panResponder = useRef(PanResponder.create({
@@ -49,6 +58,7 @@ const DraggableWorkout = ({ workout, onDragStart, onDrop }: DraggableWorkoutProp
     onMoveShouldSetPanResponderCapture: () => true,
     onPanResponderGrant: () => {
       onDragStartRef.current();
+      onDragStateChangeRef.current(workoutIdRef.current);
       setIsDragging(true);
     },
     onPanResponderMove: (_, gesture) => translateY.setValue(gesture.dy),
@@ -96,6 +106,7 @@ export const WorkoutScreen = () => {
   const [editingWorkout, setEditingWorkout] = useState<WorkoutTemplate | null>(null);
   const [isReordering, setIsReordering] = useState(false);
   const [draftWorkouts, setDraftWorkouts] = useState<WorkoutTemplate[]>(routine.workouts);
+  const [draggingWorkoutId, setDraggingWorkoutId] = useState<string | null>(null);
   const daySlotRefs = useRef<Partial<Record<DayOfWeek, View | null>>>({});
   const dayBounds = useRef<Partial<Record<DayOfWeek, { top: number; bottom: number }>>>({});
 
@@ -136,6 +147,7 @@ export const WorkoutScreen = () => {
     setIsReordering(true);
   };
   const revertSchedule = () => {
+    setDraggingWorkoutId(null);
     setDraftWorkouts(currentRoutine.workouts);
     setIsReordering(false);
   };
@@ -144,6 +156,7 @@ export const WorkoutScreen = () => {
       const updatedRoutine = { ...currentRoutine, workouts: draftWorkouts };
       await routinesRepository.save(updatedRoutine);
       setCurrentRoutine(updatedRoutine);
+      setDraggingWorkoutId(null);
       setIsReordering(false);
     } catch (error) {
       console.error('[WorkoutScreen.saveSchedule]', error);
@@ -284,6 +297,7 @@ export const WorkoutScreen = () => {
         </Text>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
+          removeClippedSubviews={false}
           showsVerticalScrollIndicator={isReordering}
         >
           {WEEK_DAYS.map(day => {
@@ -292,7 +306,12 @@ export const WorkoutScreen = () => {
               <View
                 key={day}
                 ref={node => { daySlotRefs.current[day] = node; }}
-                style={[styles.daySlot, isReordering && styles.daySlotEditing]}
+                style={[
+                  styles.daySlot,
+                  isReordering && styles.daySlotEditing,
+                  workoutsForDay.some(workout => workout.id === draggingWorkoutId) &&
+                    styles.daySlotDragging,
+                ]}
               >
                 <Text style={styles.dayLabel}>{getDayOfWeekMessage(day)}</Text>
                 {workoutsForDay.length > 0 ? workoutsForDay.map(workout => (
@@ -301,6 +320,7 @@ export const WorkoutScreen = () => {
                       key={workout.id}
                       workout={workout}
                       onDragStart={measureDaySlots}
+                      onDragStateChange={setDraggingWorkoutId}
                       onDrop={dropWorkout}
                     />
                   ) : renderWorkoutCard(workout, lastSessionByWorkoutId.get(workout.id) ?? null)
