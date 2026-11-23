@@ -33,6 +33,18 @@ export const styles = StyleSheet.create({
     gap: 8,
     marginVertical: 4,
   },
+  lockedDay: {
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    borderRadius: 8,
+    backgroundColor: '#F2F2F7',
+  },
+  lockedDayText: {
+    color: '#1C1C1E',
+    fontSize: 15,
+    fontWeight: '700',
+  },
   dayChip: {
     paddingHorizontal: 12,
     paddingVertical: 8,

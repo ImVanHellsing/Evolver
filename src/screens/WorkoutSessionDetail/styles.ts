@@ -123,6 +123,11 @@ export const styles = StyleSheet.create({
     color: '#FF3B30',
     marginTop: 2,
   },
+  setType: {
+    fontSize: 12,
+    color: '#636366',
+    marginTop: 3,
+  },
   setNotes: {
     fontSize: 12,
     color: '#8E8E93',

@@ -1,0 +1,220 @@
+{
+  "id": "torso-limbs-new",
+  "name": "Rotina Torso & Limbs",
+  "workouts": [
+    {
+      "id": "torso-limbs-torso-1",
+      "dayOfWeek": "MONDAY",
+      "description": "Torso 1",
+      "exercises": [
+        {
+          "id": "torso-limbs-torso-1-e0",
+          "name": "Crucifixo Reto Apoiado na Polia",
+          "description": "Polia da Medianeira",
+          "muscleGroup": "Chest"
+        },
+        {
+          "id": "torso-limbs-torso-1-e1",
+          "name": "Supino Inclinado Halter",
+          "description": "",
+          "muscleGroup": "Chest"
+        },
+        {
+          "id": "torso-limbs-torso-1-e2",
+          "name": "Low Row Unilateral",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Back"
+        },
+        {
+          "id": "torso-limbs-torso-1-e3",
+          "name": "High Row Unilateral Neutra",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Back"
+        },
+        {
+          "id": "torso-limbs-torso-1-e4",
+          "name": "Desenvolvimento no Smith",
+          "description": "",
+          "muscleGroup": "Shoulders"
+        },
+        {
+          "id": "torso-limbs-torso-1-e5",
+          "name": "Posterior de Ombro na Polia Simultânea",
+          "description": "Polia da Medianeira",
+          "muscleGroup": "Shoulders"
+        },
+        {
+          "id": "torso-limbs-torso-1-e6",
+          "name": "Tríceps Testa Unilateral Polia",
+          "description": "Polia da Medianeira",
+          "muscleGroup": "Triceps"
+        },
+        {
+          "id": "torso-limbs-torso-1-e7",
+          "name": "Lombar Romano",
+          "description": "",
+          "muscleGroup": "Core"
+        }
+      ]
+    },
+    {
+      "id": "torso-limbs-limbs-1",
+      "dayOfWeek": "TUESDAY",
+      "description": "Limbs 1",
+      "exercises": [
+        {
+          "id": "torso-limbs-limbs-1-e0",
+          "name": "Cadeira Flexora Simultânea",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Hamstrings"
+        },
+        {
+          "id": "torso-limbs-limbs-1-e1",
+          "name": "Leg Press",
+          "description": "Leg Press da Medianeira",
+          "muscleGroup": "Quads"
+        },
+        {
+          "id": "torso-limbs-limbs-1-e2",
+          "name": "Stiff no Belt Squat",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Hamstrings"
+        },
+        {
+          "id": "torso-limbs-limbs-1-e3",
+          "name": "Cadeira Extensora Simultânea",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Quads"
+        },
+        {
+          "id": "torso-limbs-limbs-1-e4",
+          "name": "Bayesian Curl Unilateral",
+          "description": "Polia da Medianeira",
+          "muscleGroup": "Biceps"
+        },
+        {
+          "id": "torso-limbs-limbs-1-e5",
+          "name": "Tríceps Francês Halter Simultâneo",
+          "description": "",
+          "muscleGroup": "Triceps"
+        },
+        {
+          "id": "torso-limbs-limbs-1-e6",
+          "name": "Panturrilha Sentado",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Calves"
+        }
+      ]
+    },
+    {
+      "id": "torso-limbs-torso-2",
+      "dayOfWeek": "FRIDAY",
+      "description": "Torso 2",
+      "exercises": [
+        {
+          "id": "torso-limbs-torso-2-e0",
+          "name": "Pulldown Polia",
+          "description": "Polia da Medianeira",
+          "muscleGroup": "Back"
+        },
+        {
+          "id": "torso-limbs-torso-2-e1",
+          "name": "Supino Reto Máquina",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Chest"
+        },
+        {
+          "id": "torso-limbs-torso-2-e2",
+          "name": "Rowing Máquina Unilateral",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Back"
+        },
+        {
+          "id": "torso-limbs-torso-2-e3",
+          "name": "Crucifixo Polia Baixa Apoiado",
+          "description": "Polia da Medianeira",
+          "muscleGroup": "Chest"
+        },
+         {
+          "id": "torso-limbs-torso-2-e4",
+          "name": "Kelso Shrugs",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Back"
+        },
+        {
+          "id": "torso-limbs-torso-2-e5",
+          "name": "Elevação Lateral Máquina Unilateral",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Shoulders"
+        },
+        {
+          "id": "torso-limbs-torso-2-e6",
+          "name": "Posterior de Ombro no Voador Unilateral",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Shoulders"
+        },
+        {
+          "id": "torso-limbs-torso-2-e7",
+          "name": "Rosca Scott Unilateral Halter",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Biceps"
+        }
+      ]
+    },
+    {
+      "id": "torso-limbs-limbs-2",
+      "dayOfWeek": "SATURDAY",
+      "description": "Limbs 2",
+      "exercises": [
+        {
+          "id": "torso-limbs-limbs-2-e0",
+          "name": "Agachamento Hack",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Quads"
+        },
+        {
+          "id": "torso-limbs-limbs-2-e1",
+          "name": "Elevação Pélvica",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Glutes"
+        },
+        {
+          "id": "torso-limbs-limbs-2-e2",
+          "name": "Flexora Unilateral",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Hamstrings"
+        },
+        {
+          "id": "torso-limbs-limbs-2-e3",
+          "name": "Panturrilha em Pé Máquina",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Calves"
+        },
+        {
+          "id": "torso-limbs-limbs-2-e4",
+          "name": "Cadeira Adutora",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Adductors"
+        },
+        {
+          "id": "torso-limbs-limbs-2-e5",
+          "name": "Cadeira Abdutora",
+          "description": "Máquina da Medianeira",
+          "muscleGroup": "Glutes"
+        },
+        {
+          "id": "torso-limbs-limbs-2-e6",
+          "name": "Rosca Martelo Alternada com Halter",
+          "description": "Polia da Medianeira",
+          "muscleGroup": "Biceps"
+        },
+        {
+          "id": "torso-limbs-limbs-2-e7",
+          "name": "Tríceps Polia Unilateral",
+          "description": "Polia da Medianeira",
+          "muscleGroup": "Triceps"
+        }
+      ]
+    }
+  ]
+}

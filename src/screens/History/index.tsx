@@ -54,13 +54,19 @@ export function HistoryScreen({ showBackButton = true }: HistoryScreenProps) {
       [DayOfWeek.SATURDAY]: [],
       [DayOfWeek.SUNDAY]: [],
     };
+    const unknownDateSessions: HistoryItem[] = [];
 
     history.forEach(item => {
-      const dayOfWeek = days[item.date.getDay()];
+      const dayIndex = item.date.getDay();
+      const dayOfWeek = days[dayIndex];
+      if (!item.hasKnownDate || !dayOfWeek) {
+        unknownDateSessions.push(item);
+        return;
+      }
       groups[dayOfWeek].push(item);
     });
 
-    return Object.entries(groups)
+    const datedGroups = Object.entries(groups)
       .map(([key, sessions]) => ({
         dayOfWeek: key as DayOfWeek,
         title: getDayOfWeekMessage(key as DayOfWeek),
@@ -68,6 +74,10 @@ export function HistoryScreen({ showBackButton = true }: HistoryScreenProps) {
       }))
       .filter(group => group.data.length > 0)
       .sort((a, b) => DAY_OF_WEEK_ORDER[a.dayOfWeek] - DAY_OF_WEEK_ORDER[b.dayOfWeek]);
+
+    return unknownDateSessions.length > 0
+      ? [...datedGroups, { dayOfWeek: undefined, title: 'Data desconhecida', data: unknownDateSessions }]
+      : datedGroups;
   }, [history]);
 
   const renderItem = ({ item }: { item: HistoryItem }) => {
@@ -75,7 +85,7 @@ export function HistoryScreen({ showBackButton = true }: HistoryScreenProps) {
     const formattedDate = formatDate(date);
 
     const formatDuration = (min?: number) => {
-      if (!min) return null;
+      if (typeof min !== 'number' || !Number.isFinite(min) || min <= 0) return null;
       const hours = Math.floor(min / 60);
       const remainingMinutes = min % 60;
       if (hours > 0) {
@@ -85,6 +95,11 @@ export function HistoryScreen({ showBackButton = true }: HistoryScreenProps) {
     };
 
     const durationText = formatDuration(item.duration);
+    const caloriesValue = typeof item.caloriesEstimated === 'number' &&
+      Number.isFinite(item.caloriesEstimated)
+      ? item.caloriesEstimated
+      : null;
+    const hasSessionInfo = durationText !== null || caloriesValue !== null;
 
     return (
       <Pressable
@@ -96,20 +111,20 @@ export function HistoryScreen({ showBackButton = true }: HistoryScreenProps) {
           <Text style={styles.dateText}>{formattedDate}</Text>
         </View>
 
-        {(durationText || item.caloriesEstimated) && (
+        {hasSessionInfo ? (
           <View style={styles.sessionInfoContainer}>
-            {durationText && (
+            {durationText !== null ? (
               <Text style={styles.sessionInfoText}>
                 Duração: <Text style={styles.sessionInfoValue}>{durationText}</Text>
               </Text>
-            )}
-            {item.caloriesEstimated && (
+            ) : null}
+            {caloriesValue !== null ? (
               <Text style={styles.sessionInfoText}>
-                Calorias: <Text style={styles.sessionInfoValue}>{Math.round(item.caloriesEstimated)} kcal</Text>
+                Calorias: <Text style={styles.sessionInfoValue}>{Math.round(caloriesValue)} kcal</Text>
               </Text>
-            )}
+            ) : null}
           </View>
-        )}
+        ) : null}
       </Pressable>
     );
   };

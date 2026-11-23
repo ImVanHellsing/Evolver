@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, View, Text, TextInput, Pressable } from 'react-native';
 import { DayOfWeek, DayOfWeekMessage } from '../../models/DayOfWeek';
 import { styles } from './styles';
@@ -7,26 +7,34 @@ interface CreateWorkoutModalProps {
   visible: boolean;
   onSave: (dayOfWeek: DayOfWeek, description: string) => void;
   onCancel: () => void;
+  initialDayOfWeek?: DayOfWeek;
+  lockDaySelection?: boolean;
 }
 
 export const CreateWorkoutModal = ({
   visible,
   onSave,
   onCancel,
+  initialDayOfWeek = DayOfWeek.MONDAY,
+  lockDaySelection = false,
 }: CreateWorkoutModalProps) => {
-  const [dayOfWeek, setDayOfWeek] = useState<DayOfWeek>(DayOfWeek.MONDAY);
+  const [dayOfWeek, setDayOfWeek] = useState<DayOfWeek>(initialDayOfWeek);
   const [description, setDescription] = useState('');
+
+  useEffect(() => {
+    if (visible) setDayOfWeek(initialDayOfWeek);
+  }, [initialDayOfWeek, visible]);
 
   const handleSave = () => {
     if (description.trim().length === 0) return;
     onSave(dayOfWeek, description.trim());
     setDescription('');
-    setDayOfWeek(DayOfWeek.MONDAY);
+    setDayOfWeek(initialDayOfWeek);
   };
 
   const handleCancel = () => {
     setDescription('');
-    setDayOfWeek(DayOfWeek.MONDAY);
+    setDayOfWeek(initialDayOfWeek);
     onCancel();
   };
 
@@ -42,7 +50,11 @@ export const CreateWorkoutModal = ({
           <Text style={styles.modalTitle}>Novo Treino</Text>
           
           <Text style={styles.label}>Dia da Semana</Text>
-          <View style={styles.daySelectorGrid}>
+          {lockDaySelection ? (
+            <View style={styles.lockedDay}>
+              <Text style={styles.lockedDayText}>{DayOfWeekMessage[dayOfWeek]}</Text>
+            </View>
+          ) : <View style={styles.daySelectorGrid}>
             {Object.entries(DayOfWeekMessage).map(([key, label]) => (
               <Pressable
                 key={key}
@@ -60,7 +72,7 @@ export const CreateWorkoutModal = ({
                 </Text>
               </Pressable>
             ))}
-          </View>
+          </View>}
 
           <Text style={styles.label}>Descrição / Foco</Text>
           <TextInput

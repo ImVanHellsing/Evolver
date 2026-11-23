@@ -40,6 +40,19 @@ const session = (
 });
 
 describe('workoutProgress', () => {
+  it('compares cluster total reps using the normal progression rules', () => {
+    const previousExercise = exercise('A', 60, SetType.ClusterSet);
+    previousExercise.sets[0] = { ...previousExercise.sets[0], reps: 9, clusterBlocks: [4, 3, 2] };
+    const currentExercise = exercise('A', 60, SetType.ClusterSet);
+    currentExercise.sets[0] = { ...currentExercise.sets[0], reps: 12, clusterBlocks: [4, 4, 4] };
+    const previous = session('previous', '2026-07-01', [previousExercise]);
+    const current = session('current', '2026-07-08', [currentExercise]);
+    expect(calculatePositionComparisons(current, previous, null)[0].sets[0].status).toBe('evolution');
+    currentExercise.sets[0].reps = 9;
+    expect(calculatePositionComparisons(current, previous, null)[0].sets[0].status).toBe('stagnation');
+    currentExercise.sets[0].reps = 6;
+    expect(calculatePositionComparisons(current, previous, null)[0].sets[0].status).toBe('involution');
+  });
   it('compares strictly by position and continues after a different exercise', () => {
     const previous = session('previous', '2026-07-01', [
       exercise('A', 20),
@@ -87,7 +100,7 @@ describe('workoutProgress', () => {
     expect(result[1].previous?.exercise.exerciseTemplateId).toBe('B');
   });
 
-  it('uses only work and Top Set records', () => {
+  it('shows and compares every logged set type', () => {
     const previous = session('previous', '2026-07-01', [
       exercise('A', 10, SetType.WarmUpSet),
     ]);
@@ -103,8 +116,11 @@ describe('workoutProgress', () => {
 
     const result = calculatePositionComparisons(current, previous, null);
 
-    expect(result[0].current?.sets).toHaveLength(1);
-    expect(result[0].current?.sets[0].type).toBe(SetType.TopSet);
+    expect(result[0].current?.sets).toHaveLength(2);
+    expect(result[0].sets).toHaveLength(2);
+    expect(result[0].sets[0].current.type).toBe(SetType.WarmUpSet);
+    expect(result[0].sets[0].previous).toBeDefined();
+    expect(result[0].sets[1].current.type).toBe(SetType.TopSet);
   });
 
   it('selects only the immediately previous session of the same workout list', () => {

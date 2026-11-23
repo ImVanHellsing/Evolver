@@ -2,7 +2,6 @@ import { ExerciseLog } from '@/models/Exercise';
 import { FAILURE_TYPE_PRIORITY } from '@/models/FailureType';
 import { RoutineTemplate } from '@/models/Routine';
 import { SetLog } from '@/models/Set';
-import { SetType } from '@/models/SetType';
 import { WorkoutSession } from '@/models/Workout';
 
 export type ProgressionStatus = 'evolution' | 'stagnation' | 'involution';
@@ -27,9 +26,6 @@ export interface PositionComparison {
   sets: SetComparison[];
 }
 
-export const isProgressionSet = (set: SetLog) =>
-  set.type === SetType.WorkSet || set.type === SetType.TopSet;
-
 export const getExerciseName = (
   exerciseLog: ExerciseLog,
   routine: RoutineTemplate | null
@@ -49,20 +45,20 @@ const toExerciseRecord = (
 ): ExerciseRecord => ({
   exercise,
   name: getExerciseName(exercise, routine),
-  sets: exercise.sets.filter(isProgressionSet),
+  sets: exercise.sets,
 });
 
 const compareSets = (
   currentExercise: ExerciseLog,
   previousExercise: ExerciseLog
 ): SetComparison[] => {
-  const validCurrentSets = currentExercise.sets.filter(isProgressionSet);
-  const validPreviousSets = previousExercise.sets.filter(isProgressionSet);
+  const currentSets = currentExercise.sets;
+  const previousSets = previousExercise.sets;
 
-  return validCurrentSets.map(currentSet => {
-    const currentSetsOfType = validCurrentSets.filter(set => set.type === currentSet.type);
+  return currentSets.map(currentSet => {
+    const currentSetsOfType = currentSets.filter(set => set.type === currentSet.type);
     const indexInType = currentSetsOfType.indexOf(currentSet);
-    const previousSet = validPreviousSets.filter(set => set.type === currentSet.type)[indexInType];
+    const previousSet = previousSets.filter(set => set.type === currentSet.type)[indexInType];
     let status: ProgressionStatus = 'stagnation';
 
     if (previousSet) {

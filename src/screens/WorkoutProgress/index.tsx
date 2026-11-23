@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, useWindowDimensions, View } from 'react-native';
 
 import { Header } from '@/components/Header';
 import { useAppRouteParams } from '@/hooks/useAppRouteParams';
 import { WorkoutSession } from '@/models/Workout';
+import { getSetTypeMessage } from '@/models/SetType';
+import { formatClusterBlocks } from '@/utils/clusterUtils';
 import { routinesRepository } from '@/services/routines/routinesRepository';
 import { workoutSessionsRepository } from '@/services/workouts/workoutSessionsRepository';
 
@@ -33,10 +35,11 @@ interface ExerciseRecordCardProps {
   record: ExerciseRecord;
   label: 'Atual' | 'Anterior';
   change: 'different' | 'added' | 'removed';
+  width?: number;
 }
 
-const ExerciseRecordCard = ({ record, label, change }: ExerciseRecordCardProps) => (
-  <View style={styles.exerciseCard}>
+const ExerciseRecordCard = ({ record, label, change, width }: ExerciseRecordCardProps) => (
+  <View style={[styles.exerciseCard, width ? { width } : null]}>
     <View style={styles.exerciseTitleRow}>
       <Text style={styles.exerciseName}>{record.name}</Text>
       <View
@@ -65,23 +68,31 @@ const ExerciseRecordCard = ({ record, label, change }: ExerciseRecordCardProps) 
     {record.sets.length > 0 ? (
       record.sets.map((set, index) => (
         <View key={set.id} style={styles.standaloneSetRow}>
-          <Text style={styles.setNumber}>{index + 1}º</Text>
-          <Text style={label === 'Atual' ? styles.currText : styles.prevText}>
-            {set.weight}kg x {set.reps}
-          </Text>
+          <Text style={styles.standaloneSetNumber}>{index + 1}º</Text>
+          <View style={styles.standaloneSetData}>
+            <Text style={label === 'Atual' ? styles.currText : styles.prevText}>
+              {set.weight}kg x {set.reps}
+            </Text>
+            <Text style={styles.standaloneSetType}>{getSetTypeMessage(set.type)}</Text>
+            {set.clusterBlocks?.length ? (
+              <Text style={styles.standaloneSetType}>{formatClusterBlocks(set.clusterBlocks)}</Text>
+            ) : null}
+          </View>
         </View>
       ))
     ) : (
-      <Text style={styles.noValidSetsText}>Sem séries de trabalho ou Top Set.</Text>
+      <Text style={styles.noValidSetsText}>Sem séries registradas.</Text>
     )}
   </View>
 );
 
 export const WorkoutProgressScreen = () => {
+  const { width: screenWidth } = useWindowDimensions();
   const { session } = useAppRouteParams<'WorkoutProgress'>();
   const [previousSession, setPreviousSession] = useState<WorkoutSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [comparisons, setComparisons] = useState<PositionComparison[]>([]);
+  const carouselCardWidth = Math.min(Math.max(screenWidth - 64, 260), 380);
 
   useEffect(() => {
     async function loadData() {
@@ -180,7 +191,12 @@ export const WorkoutProgressScreen = () => {
 
                 {comparison.sets.length > 0 ? comparison.sets.map((set, index) => (
                   <View key={set.current.id} style={styles.setRow}>
-                    <Text style={styles.setNumber}>{index + 1}º</Text>
+                    <View style={styles.comparedSetLabel}>
+                      <Text style={styles.setNumber}>{index + 1}º</Text>
+                      <Text style={styles.comparedSetType}>
+                        {getSetTypeMessage(set.current.type)}
+                      </Text>
+                    </View>
 
                     <View style={styles.setComparisonBoxPrev}>
                       {set.previous ? (
@@ -190,12 +206,22 @@ export const WorkoutProgressScreen = () => {
                       ) : (
                         <Text style={styles.noDataText}>-</Text>
                       )}
+                      {set.previous?.clusterBlocks?.length ? (
+                        <Text style={styles.standaloneSetType}>
+                          {formatClusterBlocks(set.previous.clusterBlocks)}
+                        </Text>
+                      ) : null}
                     </View>
 
                     <View style={styles.setComparisonBoxCurr}>
                       <Text style={styles.currText}>
                         {set.current.weight}kg x {set.current.reps}
                       </Text>
+                      {set.current.clusterBlocks?.length ? (
+                        <Text style={styles.standaloneSetType}>
+                          {formatClusterBlocks(set.current.clusterBlocks)}
+                        </Text>
+                      ) : null}
                     </View>
 
                     <View style={styles.statusBox}>
@@ -209,16 +235,40 @@ export const WorkoutProgressScreen = () => {
                     </View>
                   </View>
                 )) : (
-                  <Text style={styles.noValidSetsText}>Sem séries de trabalho ou Top Set.</Text>
+                  <Text style={styles.noValidSetsText}>Sem séries registradas.</Text>
                 )}
               </View>
             ) : null}
 
-            {comparison.kind === 'different' && comparison.previous ? (
-              <ExerciseRecordCard record={comparison.previous} label="Anterior" change="different" />
-            ) : null}
-            {comparison.kind === 'different' && comparison.current ? (
-              <ExerciseRecordCard record={comparison.current} label="Atual" change="different" />
+            {comparison.kind === 'different' ? (
+              <>
+                <ScrollView
+                  horizontal
+                  contentContainerStyle={styles.divergentCarousel}
+                  decelerationRate="fast"
+                  showsHorizontalScrollIndicator={false}
+                  snapToAlignment="start"
+                  snapToInterval={carouselCardWidth + 12}
+                >
+                  {comparison.previous ? (
+                    <ExerciseRecordCard
+                      change="different"
+                      label="Anterior"
+                      record={comparison.previous}
+                      width={carouselCardWidth}
+                    />
+                  ) : null}
+                  {comparison.current ? (
+                    <ExerciseRecordCard
+                      change="different"
+                      label="Atual"
+                      record={comparison.current}
+                      width={carouselCardWidth}
+                    />
+                  ) : null}
+                </ScrollView>
+                <Text style={styles.carouselHint}>Deslize para comparar os dois registros</Text>
+              </>
             ) : null}
             {comparison.kind === 'added' && comparison.current ? (
               <ExerciseRecordCard record={comparison.current} label="Atual" change="added" />

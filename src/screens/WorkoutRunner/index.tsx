@@ -21,7 +21,8 @@ import { useAppRouteParams } from '@/hooks/useAppRouteParams';
 import { FailureType, FailureTypeMessage } from '@/models/FailureType';
 import { MuscleGroup, getMuscleGroupMessage } from '@/models/MuscleGroup';
 import { SetLog } from '@/models/Set';
-import { SetType, getSetTypeMessage } from '@/models/SetType';
+import { SetType, getSetTypeMessage, isExerciseFinishingSet } from '@/models/SetType';
+import { formatClusterBlocks, getClusterTotal } from '@/utils/clusterUtils';
 
 import { styles } from './styles';
 import { useWorkoutRunner } from './useWorkoutRunner';
@@ -31,6 +32,7 @@ const SET_TYPE_OPTIONS = [
     type: SetType.WarmUpSet,
     label: 'Aquecimento',
     icon: '🔥',
+    shortDescription: 'Carga leve para preparar o corpo.',
     description:
       'Séries de aquecimento preparam o corpo para cargas maiores. Use cargas leves e foque na execução.',
   },
@@ -38,6 +40,7 @@ const SET_TYPE_OPTIONS = [
     type: SetType.RampUpSet,
     label: 'Reconhecimento',
     icon: '🎯',
+    shortDescription: 'Calibre a carga e a execução.',
     description:
       'Séries para calibrar a carga e testar a execução antes das séries de trabalho.',
   },
@@ -45,6 +48,7 @@ const SET_TYPE_OPTIONS = [
     type: SetType.WorkSet,
     label: 'Trabalho',
     icon: '💪',
+    shortDescription: 'Progrida em carga ou repetições.',
     description:
       'Séries principais do treino, onde o objetivo é gerar progresso de carga ou repetições.',
   },
@@ -52,16 +56,41 @@ const SET_TYPE_OPTIONS = [
     type: SetType.TopSet,
     label: 'Top Set',
     icon: '⭐',
+    shortDescription: 'Maior intensidade do exercício.',
     description: 'Série de maior intensidade do treino. Deve ser feita com o máximo de esforço.',
+  },
+  {
+    type: SetType.BackoffSet,
+    label: 'Backoff Set',
+    icon: '↘',
+    shortDescription: 'Reduza a carga e faça a última série.',
+    description: 'Reduza a carga em relação à série anterior e faça uma nova série para encerrar o exercício.',
+  },
+  {
+    type: SetType.ClusterSet,
+    label: 'Cluster Set',
+    icon: '▦',
+    shortDescription: 'Blocos com pausas de 15 segundos.',
+    description: 'Uma série em blocos de repetições, com cerca de 15 segundos de intervalo.',
   },
 ] as const;
 
 type PersonalRecord = {
+  clusterBlocks?: number[];
   weight: number;
   reps: number;
   failureType?: FailureType;
   type?: SetType;
   date?: string;
+} | null;
+
+type LastSetReference = {
+  clusterBlocks?: number[];
+  weight: number;
+  reps: number;
+  failureType: FailureType;
+  type: SetType;
+  date: string;
 } | null;
 
 const formatWeight = (value: number) =>
@@ -95,6 +124,24 @@ const EmptyWorkoutState = ({ onBack }: EmptyWorkoutStateProps) => (
     <Pressable style={styles.primaryButton} onPress={onBack}>
       <Text style={styles.primaryButtonText}>Voltar</Text>
     </Pressable>
+  </View>
+);
+
+interface CompletedExerciseStateProps {
+  setsCount: number;
+}
+
+const CompletedExerciseState = ({ setsCount }: CompletedExerciseStateProps) => (
+  <View style={styles.completedExerciseCard}>
+    <Text style={styles.completedExerciseIcon}>✓</Text>
+    <Text style={styles.completedExerciseTitle}>Exercício finalizado</Text>
+    <Text style={styles.completedExerciseDescription}>
+      Este exercício já foi concluído com {setsCount}{' '}
+      {setsCount === 1 ? 'série registrada' : 'séries registradas'}.
+    </Text>
+    <Text style={styles.completedExerciseHint}>
+      Use a barra superior para acessar um exercício pendente ou pulado.
+    </Text>
   </View>
 );
 
@@ -165,9 +212,46 @@ const PRCard = ({ personalRecord, compact = false }: PRCardProps) => (
         {personalRecord.type ? (
           <Text style={styles.prType}>{getSetTypeMessage(personalRecord.type)}</Text>
         ) : null}
+        {personalRecord.clusterBlocks?.length ? (
+          <Text style={styles.prType}>{formatClusterBlocks(personalRecord.clusterBlocks)}</Text>
+        ) : null}
       </>
     ) : (
       <Text style={styles.emptyCardText}>Sem histórico para este exercício.</Text>
+    )}
+  </View>
+);
+
+interface LastSetCardProps {
+  reference: LastSetReference;
+  selectedSetType: SetType;
+}
+
+const LastSetCard = ({ reference, selectedSetType }: LastSetCardProps) => (
+  <View style={[styles.card, styles.compactCard]}>
+    <View style={[styles.cardHeader, styles.compactCardHeader]}>
+      <View style={[styles.cardTitleGroup, styles.lastSetTitleGroup]}>
+        <Text style={styles.lastSetIcon}>↶</Text>
+        <Text numberOfLines={2} style={[styles.cardTitle, styles.lastSetTitle]}>
+          Último registro · {getSetTypeMessage(selectedSetType)}
+        </Text>
+      </View>
+      {reference?.date ? <Text style={styles.dateBadge}>{reference.date}</Text> : null}
+    </View>
+    {reference ? (
+      <>
+      <Text style={[styles.prValue, styles.prValueCompact]}>
+        {formatWeight(reference.weight)} kg · {reference.reps} reps ·{' '}
+        {FailureTypeMessage[reference.failureType]}
+      </Text>
+      {reference.clusterBlocks?.length ? (
+        <Text style={styles.prType}>{formatClusterBlocks(reference.clusterBlocks)}</Text>
+      ) : null}
+      </>
+    ) : (
+      <Text style={styles.emptyCardText}>
+        Nenhuma série deste tipo foi registrada anteriormente.
+      </Text>
     )}
   </View>
 );
@@ -286,12 +370,15 @@ const StepperInput = ({
 );
 
 interface StandardFormProps {
+  clusterBlocks: number[];
+  onChangeClusterBlocks: (blocks: number[]) => void;
   currentSetNumber: number;
   selectedSetType: SetType;
   weight: string;
   reps: string;
   failureType: FailureType;
   personalRecord: PersonalRecord;
+  previousPerformance: LastSetReference;
   onChangeWeight: (weight: string) => void;
   onChangeReps: (reps: string) => void;
   onChangeFailureType: (type: FailureType) => void;
@@ -300,12 +387,15 @@ interface StandardFormProps {
 }
 
 const StandardForm = ({
+  clusterBlocks,
+  onChangeClusterBlocks,
   currentSetNumber,
   selectedSetType,
   weight,
   reps,
   failureType,
   personalRecord,
+  previousPerformance,
   onChangeWeight,
   onChangeReps,
   onChangeFailureType,
@@ -317,7 +407,9 @@ const StandardForm = ({
   const parsedReps = Number.parseInt(reps, 10);
   const numericWeight = Number.isFinite(parsedWeight) ? parsedWeight : 0;
   const numericReps = Number.isFinite(parsedReps) ? parsedReps : 0;
-  const canSave = Number.isFinite(parsedWeight) && Number.isFinite(parsedReps);
+  const isCluster = selectedSetType === SetType.ClusterSet;
+  const canSave = Number.isFinite(parsedWeight) &&
+    (isCluster ? clusterBlocks.length > 0 : Number.isFinite(parsedReps));
   const failureOptions = [
     { type: FailureType.ZERO_RESERVED, label: '0 reserva' },
     { type: FailureType.ONE_RESERVED, label: '1 reserva' },
@@ -350,6 +442,46 @@ const StandardForm = ({
           onIncrement={() => onChangeWeight(formatEditableWeight(numericWeight + 2.5, weight))}
         />
         <View style={styles.formDivider} />
+        {isCluster ? (
+          <View style={styles.stepperSection}>
+            <Text style={styles.inputLabel}>Repetições por bloco</Text>
+            <Text style={styles.emptyCardText}>
+              Faça blocos curtos de repetições, com cerca de 15 segundos de intervalo entre eles — aproximadamente 3 respirações profundas. Registre cada bloco abaixo.
+            </Text>
+            <View style={styles.clusterButtons}>
+              {[4, 3, 2].map(block => (
+                <Pressable
+                  key={block}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Adicionar bloco de ${block} repetições`}
+                  style={styles.clusterAddButton}
+                  onPress={() => onChangeClusterBlocks([...clusterBlocks, block])}
+                >
+                  <Text style={styles.badgeText}>+ {block} reps</Text>
+                </Pressable>
+              ))}
+            </View>
+            <View style={styles.clusterBlocks}>
+              {clusterBlocks.map((block, index) => (
+                <Pressable
+                  key={index}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Remover bloco ${index + 1}, ${block} repetições`}
+                  style={styles.badge}
+                  onPress={() => onChangeClusterBlocks(clusterBlocks.filter((_, i) => i !== index))}
+                >
+                  <Text style={styles.badgeText}>{block} ×</Text>
+                </Pressable>
+              ))}
+            </View>
+            <Text style={styles.prValue}>
+              {getClusterTotal(clusterBlocks)} reps · {clusterBlocks.length} blocos
+            </Text>
+            <Text style={styles.emptyCardText}>
+              Toque em um bloco para removê-lo. Os intervalos não têm timer.
+            </Text>
+          </View>
+        ) : (
         <StepperInput
           label="Repetições"
           unit="reps"
@@ -359,6 +491,7 @@ const StandardForm = ({
           onDecrement={() => onChangeReps(String(Math.max(0, numericReps - 1)))}
           onIncrement={() => onChangeReps(String(numericReps + 1))}
         />
+        )}
         <View style={styles.formDivider} />
         <Text style={styles.inputLabel}>Tipo de falha</Text>
         <View style={styles.failureGrid}>
@@ -381,12 +514,18 @@ const StandardForm = ({
         </View>
       </View>
 
+      <LastSetCard
+        reference={previousPerformance}
+        selectedSetType={selectedSetType}
+      />
       <PRCard personalRecord={personalRecord} compact />
 
       <View style={styles.infoBanner}>
         <Text style={styles.infoBannerIcon}>i</Text>
         <Text style={styles.infoBannerText}>
-          Após concluir esta série, vamos perguntar qual será o tipo da próxima para calcular o descanso inteligente.
+          {isExerciseFinishingSet(selectedSetType)
+            ? `${selectedSetType === SetType.BackoffSet ? 'Reduza a carga em relação à série anterior. ' : ''}Ao concluir esta ${setTypeOption.label}, o exercício será finalizado e você avançará para o próximo. Se for o último, vamos revisar o encerramento do treino.`
+            : 'Após concluir esta série, vamos perguntar qual será o tipo da próxima para calcular o descanso inteligente.'}
         </Text>
       </View>
 
@@ -422,7 +561,6 @@ const DecisionModal = ({
 }: DecisionModalProps) => {
   const insets = useSafeAreaInsets();
   const suggestedType = getNextSetType(loggedSets);
-  const visibleSuggestion = suggestedType === SetType.BackoffSet ? SetType.WorkSet : suggestedType;
 
   return (
     <Modal animationType="slide" onRequestClose={onCancel} transparent visible={visible}>
@@ -434,48 +572,52 @@ const DecisionModal = ({
           <Text style={styles.sheetSubtitle}>
             Toque no tipo da próxima série para iniciar o descanso inteligente.
           </Text>
-          <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
-            {SET_TYPE_OPTIONS.map(option => {
-              const selected = option.type === visibleSuggestion;
-              return (
-                <Pressable
-                  accessibilityHint="Inicia a contagem do descanso"
-                  accessibilityRole="button"
-                  key={option.type}
-                  onPress={() => onChoose('set', option.type)}
-                  style={styles.sheetOption}
-                >
-                  <Text style={styles.sheetOptionIcon}>{option.icon}</Text>
-                  <View style={styles.sheetOptionContent}>
-                    <View style={styles.sheetOptionTitleRow}>
-                      <Text style={styles.sheetOptionTitle}>{option.label}</Text>
+          <ScrollView bounces={false} showsVerticalScrollIndicator persistentScrollbar>
+            <View style={styles.sheetGrid}>
+              {SET_TYPE_OPTIONS.map(option => {
+                const selected = option.type === suggestedType;
+                return (
+                  <Pressable
+                    accessibilityHint={isExerciseFinishingSet(option.type)
+                      ? 'Inicia o descanso. Concluir esta série encerra o exercício.'
+                      : 'Inicia a contagem do descanso'}
+                    accessibilityRole="button"
+                    key={option.type}
+                    onPress={() => onChoose('set', option.type)}
+                    style={[styles.sheetTypeCard, selected && styles.sheetSuggestedCard]}
+                  >
+                    <View style={styles.sheetCardHeader}>
+                      <Text style={styles.sheetCardIcon}>{option.icon}</Text>
                       {selected ? (
                         <View style={styles.suggestedBadge}>
                           <Text style={styles.suggestedBadgeText}>Sugerido</Text>
                         </View>
                       ) : null}
                     </View>
-                    <Text style={styles.sheetOptionDescription}>{option.description}</Text>
-                  </View>
-                  <Text style={styles.sheetActionArrow}>→</Text>
-                </Pressable>
-              );
-            })}
-            <Pressable
-              accessibilityRole="button"
-              style={[styles.sheetOption, styles.finishOption]}
-              onPress={() => onChoose('finish')}
-            >
-              <Text style={styles.sheetOptionIcon}>✓</Text>
-              <View style={styles.sheetOptionContent}>
-                <Text style={styles.sheetOptionTitle}>Finalizar exercício</Text>
-                <Text style={styles.sheetOptionDescription}>
-                  Concluir este exercício e avançar para o próximo.
-                </Text>
-              </View>
-              <Text style={styles.sheetActionArrow}>→</Text>
-            </Pressable>
+                    <Text style={styles.sheetOptionTitle}>{option.label}</Text>
+                    <Text style={styles.sheetOptionDescription}>{option.shortDescription}</Text>
+                    <Text style={styles.sheetCardAction}>
+                      {isExerciseFinishingSet(option.type) ? 'Encerra exercício →' : 'Continuar →'}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
           </ScrollView>
+          <Pressable
+            accessibilityRole="button"
+            style={[styles.sheetOption, styles.finishOption]}
+            onPress={() => onChoose('finish')}
+          >
+            <Text style={styles.sheetOptionIcon}>✓</Text>
+            <View style={styles.sheetOptionContent}>
+              <Text style={styles.sheetOptionTitle}>Finalizar exercício</Text>
+              <Text style={styles.sheetOptionDescription}>
+                Avançar sem adicionar outra série.
+              </Text>
+            </View>
+            <Text style={styles.sheetActionArrow}>→</Text>
+          </Pressable>
           <Pressable style={styles.cancelButton} onPress={onCancel}>
             <Text style={styles.cancelButtonText}>Cancelar</Text>
           </Pressable>
@@ -520,14 +662,29 @@ export const WorkoutRunnerScreen = () => {
         </View>
         <View style={styles.progressTrack}>
           {runner.exercisesState.map((exercise, index) => (
-            <View
+            <Pressable
+              accessibilityLabel={`${exercise.name}. ${
+                exercise.isCompleted
+                  ? 'Finalizado'
+                  : exercise.isSkipped
+                    ? 'Pulado'
+                    : 'Pendente'
+              }`}
+              accessibilityRole="button"
+              accessibilityState={{ selected: index === runner.currentExerciseIndex }}
               key={exercise.id}
-              style={[
-                styles.progressSegment,
-                exercise.isCompleted && styles.progressSegmentCompleted,
-                index === runner.currentExerciseIndex && styles.progressSegmentActive,
-              ]}
-            />
+              onPress={() => runner.goToExercise(index)}
+              style={styles.progressSegmentButton}
+            >
+              <View
+                style={[
+                  styles.progressSegment,
+                  exercise.isSkipped && styles.progressSegmentSkipped,
+                  exercise.isCompleted && styles.progressSegmentCompleted,
+                  index === runner.currentExerciseIndex && styles.progressSegmentActive,
+                ]}
+              />
+            </Pressable>
           ))}
         </View>
 
@@ -539,7 +696,9 @@ export const WorkoutRunnerScreen = () => {
         >
           <ExerciseTitle name={currentExercise.name} muscleGroup={currentExercise.muscleGroup} />
 
-          {!runner.hasSelectedInitialSetType ? (
+          {runner.isCurrentExerciseCompleted ? (
+            <CompletedExerciseState setsCount={runner.loggedSetsForCurrentExercise.length} />
+          ) : !runner.hasSelectedInitialSetType ? (
             <StarterScreen
               description={currentExercise.description}
               personalRecord={runner.personalRecord}
@@ -551,9 +710,12 @@ export const WorkoutRunnerScreen = () => {
             />
           ) : (
             <StandardForm
+              clusterBlocks={runner.clusterBlocks}
+              onChangeClusterBlocks={runner.setClusterBlocks}
               currentSetNumber={runner.loggedSetsForCurrentExercise.length + 1}
               failureType={runner.failureType}
               personalRecord={runner.personalRecord}
+              previousPerformance={runner.previousPerformance}
               reps={runner.reps}
               selectedSetType={runner.selectedSetType}
               weight={runner.weight}
@@ -578,9 +740,10 @@ export const WorkoutRunnerScreen = () => {
           visible={runner.isExitModalVisible}
         />
         <MissingExercisesModal
-          missingExerciseNames={runner.missingExerciseNames}
+          missingExercises={runner.missingExercises}
           onCancel={() => runner.setIsMissingModalVisible(false)}
           onConfirm={runner.onConfirmMissingExercises}
+          onSelectExercise={runner.goToExercise}
           visible={runner.isMissingModalVisible}
         />
         <FinishWorkoutModal

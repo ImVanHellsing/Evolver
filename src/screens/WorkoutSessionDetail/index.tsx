@@ -7,6 +7,8 @@ import { routinesRepository } from "@/services/routines/routinesRepository";
 import { RoutineTemplate } from "@/models/Routine";
 import { ExerciseLog } from "@/models/Exercise";
 import { getFailureTypeMessage } from "@/models/FailureType";
+import { getSetTypeMessage } from "@/models/SetType";
+import { formatClusterBlocks } from '@/utils/clusterUtils';
 import { useAppNavigation } from "@/hooks/useAppNavigation";
 import { Routes } from "@/app/navigation/routes";
 
@@ -44,6 +46,10 @@ const ExerciseItem = ({ exercise, exerciseName }: ExerciseItemProps) => {
                 <Text style={styles.setText}>
                   <Text style={styles.setBold}>{set.weight}kg</Text> x <Text style={styles.setBold}>{set.reps}</Text> reps
                 </Text>
+                <Text style={styles.setType}>{getSetTypeMessage(set.type)}</Text>
+                {set.clusterBlocks?.length ? (
+                  <Text style={styles.setType}>{formatClusterBlocks(set.clusterBlocks)}</Text>
+                ) : null}
                 {!!set.failureType && (
                   <Text style={styles.failureType}>
                     {getFailureTypeMessage(set.failureType)}

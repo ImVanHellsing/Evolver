@@ -3,7 +3,7 @@ import { Vibration, Alert } from 'react-native';
 
 import { useAppNavigation } from '@/hooks/useAppNavigation';
 import { useAppRouteParams } from '@/hooks/useAppRouteParams';
-import { SetType } from '@/models/SetType';
+import { SetType, isExerciseFinishingSet } from '@/models/SetType';
 import { WorkoutSession, WorkoutTemplate } from '@/models/Workout';
 import { ExerciseLog } from '@/models/Exercise';
 import { SetLog } from '@/models/Set';
@@ -13,6 +13,7 @@ import { activeWorkoutSessionRepository } from '@/services/workouts/activeWorkou
 import { routinesRepository } from '@/services/routines/routinesRepository';
 import { getIntelligentRestTime, getNextSetType } from '@/utils/timerUtils';
 import { createEntityId } from '@/utils/idUtils';
+import { getClusterTotal } from '@/utils/clusterUtils';
 
 export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemplate) => {
   const navigation = useAppNavigation();
@@ -30,6 +31,7 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
 
   const [weight, setWeight] = useState('');
   const [reps, setReps] = useState('');
+  const [clusterBlocks, setClusterBlocks] = useState<number[]>([]);
   const [observation, setObservation] = useState('');
   const [failureType, setFailureType] = useState<FailureType>(FailureType.REMAINING_REPS);
   const [isExitModalVisible, setIsExitModalVisible] = useState<any>(null);
@@ -46,17 +48,26 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [timerEndTime, setTimerEndTime] = useState<number | null>(null);
 
-  const [previousPerformance, setPreviousPerformance] = useState<{ weight: number; reps: number; failureType: FailureType } | null>(null);
+  const [previousPerformance, setPreviousPerformance] = useState<{
+    weight: number;
+    reps: number;
+    failureType: FailureType;
+    type: SetType;
+    date: string;
+    clusterBlocks?: number[];
+  } | null>(null);
   const [personalRecord, setPersonalRecord] = useState<{
     weight: number;
     reps: number;
     failureType?: FailureType;
     type?: SetType;
     date?: string;
+    clusterBlocks?: number[];
   } | null>(null);
 
   // Evolver 2.0: Tracking skipped exercises explicitly
   const [skippedExerciseIds, setSkippedExerciseIds] = useState<string[]>([]);
+  const [completedExerciseIds, setCompletedExerciseIds] = useState<string[]>([]);
 
   // Dynamic rest time states
   const [lastCompletedSetType, setLastCompletedSetType] = useState<SetType | null>(null);
@@ -105,12 +116,26 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
           setCurrentExerciseIndex(savedData.currentExerciseIndex);
           setWeight(savedData.weight);
           setReps(savedData.reps);
+          setClusterBlocks(savedData.clusterBlocks ?? []);
           setObservation(savedData.observation);
           setIsResting(savedData.isResting);
           setTimerEndTime(savedData.timerEndTime);
           
           if (savedData.skippedExerciseIds) {
             setSkippedExerciseIds(savedData.skippedExerciseIds);
+          }
+          if (savedData.completedExerciseIds) {
+            setCompletedExerciseIds(savedData.completedExerciseIds);
+          } else {
+            // Legacy active sessions only moved forward after finishing an exercise.
+            // Infer completion for earlier positions that already contain sets.
+            const inferredCompletedIds = savedData.workout.exercises
+              .slice(0, savedData.currentExerciseIndex)
+              .filter(exercise => savedData.savedWorkoutSession.exercises.some(
+                log => log.exerciseTemplateId === exercise.id && log.sets.length > 0
+              ))
+              .map(exercise => exercise.id);
+            setCompletedExerciseIds(inferredCompletedIds);
           }
           if (savedData.selectedSetType) {
             setSelectedSetType(savedData.selectedSetType);
@@ -153,10 +178,12 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
         currentSetIndex: loggedSetsForCurrentExercise.length,
         weight,
         reps,
+        clusterBlocks,
         observation,
         isResting,
         timerEndTime,
         skippedExerciseIds,
+        completedExerciseIds,
         selectedSetType,
         lastCompletedSetType,
         lastCompletedSetTime,
@@ -171,12 +198,14 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     currentExerciseIndex, 
     weight, 
     reps, 
+    clusterBlocks,
     observation, 
     isResting, 
     timerEndTime,
     routineTemplateId,
     workout,
     skippedExerciseIds,
+    completedExerciseIds,
     selectedSetType,
     lastCompletedSetType,
     lastCompletedSetTime,
@@ -198,34 +227,31 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
         new Date(b.date).getTime() - new Date(a.date).getTime()
       );
 
-      // Previous performance: same exercise, same set type and index-in-type, last occurrence
-      const lastSessionWithExercise = sortedSessions.find(session => 
-        session.exercises.some(ex => ex.exerciseTemplateId === currentExercise.id)
-      );
-
-      if (lastSessionWithExercise) {
-        const exerciseLog = lastSessionWithExercise.exercises.find(
+      // Last logged set for this exercise and the currently selected set type.
+      // If the latest session does not contain that type, keep looking until its
+      // latest actual occurrence instead of returning an empty reference.
+      const lastSessionWithSelectedType = sortedSessions.find(session => {
+        const exerciseLog = session.exercises.find(
           ex => ex.exerciseTemplateId === currentExercise.id
         );
-        if (exerciseLog) {
-          const currentSetsOfType = loggedSetsForCurrentExercise.filter(s => s.type === selectedSetType);
-          const currentSetIndexInType = currentSetsOfType.length;
-          
-          const prevSetsOfType = exerciseLog.sets.filter(s => s.type === selectedSetType);
-          const prevSet = prevSetsOfType[currentSetIndexInType];
+        return exerciseLog?.sets.some(set => set.type === selectedSetType);
+      });
+      const previousExerciseLog = lastSessionWithSelectedType?.exercises.find(
+        ex => ex.exerciseTemplateId === currentExercise.id
+      );
+      const previousSetsOfType = previousExerciseLog?.sets.filter(
+        set => set.type === selectedSetType
+      ) ?? [];
+      const previousSet = previousSetsOfType[previousSetsOfType.length - 1];
 
-          if (prevSet) {
-            setPreviousPerformance({ weight: prevSet.weight, reps: prevSet.reps, failureType: prevSet.failureType });
-          } else {
-            // Fallback to first set of this type
-            setPreviousPerformance(prevSetsOfType[0] ? { weight: prevSetsOfType[0].weight, reps: prevSetsOfType[0].reps, failureType: prevSetsOfType[0].failureType } : null);
-          }
-        } else {
-          setPreviousPerformance(null);
-        }
-      } else {
-        setPreviousPerformance(null);
-      }
+      setPreviousPerformance(previousSet && lastSessionWithSelectedType ? {
+        weight: previousSet.weight,
+        reps: previousSet.reps,
+        failureType: previousSet.failureType,
+        type: previousSet.type,
+        clusterBlocks: previousSet.clusterBlocks,
+        date: new Date(lastSessionWithSelectedType.date).toLocaleDateString('pt-BR'),
+      } : null);
 
       // Personal Record: highest intensity set from the most recent session
       const lastSessionWithPR = sortedSessions.find(session => {
@@ -258,6 +284,7 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
             reps: prSet.reps,
             failureType: prSet.failureType,
             type: prSet.type,
+            clusterBlocks: prSet.clusterBlocks,
             date: new Date(lastSessionWithPR.date).toLocaleDateString('pt-BR'),
           });
         } else {
@@ -278,18 +305,17 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
   }, [currentExerciseIndex]);
 
   const clearSetForm = () => {
+    setClusterBlocks([]);
     setWeight('');
     setReps('');
     setObservation('');
     setFailureType(FailureType.REMAINING_REPS);
   }
 
-  const handleTriggerFinishFlow = () => {
-    // Check if there are exercises with no logged sets
-    const uncompleted = currentWorkout.exercises.filter(ex => {
-      const sets = savedWorkoutSession.exercises.find(e => e.exerciseTemplateId === ex.id)?.sets || [];
-      return sets.length === 0;
-    });
+  const handleTriggerFinishFlow = (finishedIds = completedExerciseIds) => {
+    const uncompleted = currentWorkout.exercises.filter(
+      exercise => !finishedIds.includes(exercise.id)
+    );
 
     if (uncompleted.length > 0) {
       setIsMissingModalVisible(true);
@@ -434,8 +460,27 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     navigation.goBack();
   }
 
+  const finishCurrentExercise = () => {
+    if (!currentExercise) return;
+    setIsChoosingNextAction(false);
+    skipRest();
+
+    const nextCompletedExerciseIds = [
+      ...new Set([...completedExerciseIds, currentExercise.id]),
+    ];
+    setCompletedExerciseIds(nextCompletedExerciseIds);
+    setSkippedExerciseIds(prev => prev.filter(id => id !== currentExercise.id));
+
+    if (currentExerciseIndex < currentWorkout.exercises.length - 1) {
+      goToExercise(currentExerciseIndex + 1);
+    } else {
+      handleTriggerFinishFlow(nextCompletedExerciseIds);
+    }
+  };
+
   const handleSaveNewSet = () => {
     if (!currentExercise) return;
+    if (selectedSetType === SetType.ClusterSet && clusterBlocks.length === 0) return;
     const completedType = selectedSetType;
     const completedAt = new Date().toISOString();
     const parsedWeight = Number(weight.replace(',', '.'));
@@ -444,7 +489,10 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
       completedAt,
       type: completedType,
       weight: parsedWeight,
-      reps: Number.parseInt(reps, 10),
+      reps: completedType === SetType.ClusterSet
+        ? getClusterTotal(clusterBlocks)
+        : Number.parseInt(reps, 10),
+      ...(completedType === SetType.ClusterSet ? { clusterBlocks: [...clusterBlocks] } : {}),
       failureType,
       notes: observation,
     };
@@ -452,7 +500,7 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     setLastCompletedSetType(completedType);
     setLastCompletedSetTime(Date.now());
     setLastLoggedWeight(parsedWeight);
-    setLastLoggedReps(Number(reps));
+    setLastLoggedReps(newSetLog.reps);
 
     // Remove current exercise from skipped list if it was there
     if (skippedExerciseIds.includes(currentExercise.id)) {
@@ -489,7 +537,11 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
       return { ...prev, exercises: [...prev.exercises, newExerciseLog] };
     });
 
-    setIsChoosingNextAction(true);
+    if (isExerciseFinishingSet(completedType)) {
+      finishCurrentExercise();
+    } else {
+      setIsChoosingNextAction(true);
+    }
   }
 
   const onChooseNextAction = (actionType: 'set' | 'finish', nextType?: SetType) => {
@@ -516,8 +568,7 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
         }
       }
     } else if (actionType === 'finish') {
-      setIsChoosingNextAction(false);
-      onNextExercisePressed();
+      finishCurrentExercise();
     }
   };
 
@@ -528,6 +579,7 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
 
   const onSaveSetPressed = () => {
     handleSaveNewSet();
+    setClusterBlocks([]);
     // Keep the latest load ready for the next set of this exercise.
     setReps('');
     setObservation('');
@@ -543,7 +595,7 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
   // Horizontal list of exercises and their statuses
   const exercisesState = currentWorkout.exercises.map(ex => {
     const loggedSets = savedWorkoutSession.exercises.find(e => e.exerciseTemplateId === ex.id)?.sets || [];
-    const isCompleted = loggedSets.length > 0;
+    const isCompleted = completedExerciseIds.includes(ex.id);
     const isSkipped = skippedExerciseIds.includes(ex.id);
     return {
       id: ex.id,
@@ -563,6 +615,7 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
         ex => ex.exerciseTemplateId === currentWorkout.exercises[index].id
       )?.sets || [];
       suggestNextSetType(existingSets);
+      setIsMissingModalVisible(false);
     }
   };
 
@@ -600,14 +653,21 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     }
   };
 
-  const uncompletedExercises = currentWorkout.exercises.filter(ex => {
-    const sets = savedWorkoutSession.exercises.find(e => e.exerciseTemplateId === ex.id)?.sets || [];
-    return sets.length === 0;
-  });
-  const missingExerciseNames = uncompletedExercises.map(ex => ex.name);
+  const missingExercises = currentWorkout.exercises
+    .map((exercise, index) => ({
+      id: exercise.id,
+      name: exercise.name,
+      index,
+    }))
+    .filter(exercise => !completedExerciseIds.includes(exercise.id));
+  const isCurrentExerciseCompleted = currentExercise
+    ? completedExerciseIds.includes(currentExercise.id)
+    : false;
 
   return {
     currentExerciseIndex,
+    clusterBlocks,
+    setClusterBlocks,
     weight,
     setWeight,
     reps,
@@ -644,6 +704,7 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
 
     // Evolver 2.0 properties
     exercisesState,
+    isCurrentExerciseCompleted,
     loggedSetsForCurrentExercise,
     goToExercise,
     onSkipExercisePressed,
@@ -651,7 +712,7 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     onNextExercisePressed,
     isMissingModalVisible,
     setIsMissingModalVisible,
-    missingExerciseNames,
+    missingExercises,
     onConfirmMissingExercises: () => {
       setIsMissingModalVisible(false);
       setIsFinishModalVisible(true);

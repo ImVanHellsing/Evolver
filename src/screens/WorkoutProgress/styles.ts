@@ -38,6 +38,17 @@ export const styles = StyleSheet.create({
     marginLeft: 4,
     textTransform: 'uppercase',
   },
+  divergentCarousel: {
+    gap: 12,
+    paddingRight: 20,
+  },
+  carouselHint: {
+    color: '#8E8E93',
+    fontSize: 12,
+    marginTop: -8,
+    marginBottom: 16,
+    marginLeft: 4,
+  },
   exerciseCard: {
     backgroundColor: '#FFF',
     borderRadius: 16,
@@ -104,7 +115,7 @@ export const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   setNumberHeader: {
-    flex: 0.5,
+    flex: 1.15,
   },
   previousHeader: {
     flex: 1.5,
@@ -130,11 +141,34 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F2F2F7',
   },
-  setNumber: {
-    flex: 0.5,
+  standaloneSetNumber: {
+    width: 30,
     fontSize: 14,
     color: '#8E8E93',
     fontWeight: '500',
+  },
+  standaloneSetData: {
+    flex: 1,
+  },
+  standaloneSetType: {
+    color: '#8E8E93',
+    fontSize: 12,
+    marginTop: 3,
+  },
+  setNumber: {
+    fontSize: 14,
+    color: '#8E8E93',
+    fontWeight: '500',
+  },
+  comparedSetLabel: {
+    flex: 1.15,
+    paddingRight: 6,
+  },
+  comparedSetType: {
+    color: '#8E8E93',
+    fontSize: 9,
+    lineHeight: 12,
+    marginTop: 2,
   },
   setComparisonBoxPrev: {
     flex: 1.5,

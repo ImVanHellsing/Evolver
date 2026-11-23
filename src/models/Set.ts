@@ -13,6 +13,7 @@ export interface SetTemplate {
 }
 
 export interface SetLog {
+	clusterBlocks?: number[];
 	id: string;
 	templateSetId?: string;
 	completedAt?: string;

@@ -40,8 +40,12 @@ export const styles = StyleSheet.create({
   },
   exerciseItem: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: 8,
+    minHeight: 46,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    backgroundColor: '#fff',
   },
   bullet: {
     fontSize: 16,
@@ -53,6 +57,11 @@ export const styles = StyleSheet.create({
     color: '#333',
     fontWeight: '500',
     flex: 1,
+  },
+  exerciseAction: {
+    fontSize: 12,
+    color: '#000',
+    fontWeight: '700',
   },
   warningMessage: {
     fontSize: 15,

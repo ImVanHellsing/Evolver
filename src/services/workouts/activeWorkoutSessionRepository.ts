@@ -11,10 +11,12 @@ export interface ActiveWorkoutSessionData {
   currentSetIndex: number;
   weight: string;
   reps: string;
+  clusterBlocks?: number[];
   observation: string;
   isResting: boolean;
   timerEndTime: number | null;
   skippedExerciseIds?: string[];
+  completedExerciseIds?: string[];
   selectedSetType?: SetType;
   lastCompletedSetType?: SetType | null;
   lastCompletedSetTime?: number | null;
