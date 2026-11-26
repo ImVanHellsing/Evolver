@@ -15,11 +15,22 @@ import { getIntelligentRestTime, getNextSetType } from '@/utils/timerUtils';
 import { createEntityId } from '@/utils/idUtils';
 import { getClusterTotal } from '@/utils/clusterUtils';
 
+/** Empty or invalid input becomes undefined instead of 0. Accepts a comma as decimal separator. */
+export const parseOptionalNumber = (value: string): number | undefined => {
+  const normalized = value.trim().replace(',', '.');
+  if (normalized === '') return undefined;
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
 export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemplate) => {
   const navigation = useAppNavigation();
   const routeParams = useAppRouteParams<'WorkoutRunner'>();
   const isResuming = routeParams.resume === true;
   const hasRestoredSessionRef = useRef(false);
+  // Exercise index set by the restore. The guided-state reset below must skip
+  // that one index change, otherwise it wipes the state that was just restored.
+  const restoredExerciseIndexRef = useRef<number | null>(null);
 
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [currentWorkout, setCurrentWorkout] = useState<WorkoutTemplate>(workout);
@@ -113,6 +124,9 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
         const savedData = await activeWorkoutSessionRepository.getActiveSession();
         if (savedData) {
           setSavedWorkoutSession(savedData.savedWorkoutSession);
+          if (savedData.currentExerciseIndex !== 0) {
+            restoredExerciseIndexRef.current = savedData.currentExerciseIndex;
+          }
           setCurrentExerciseIndex(savedData.currentExerciseIndex);
           setWeight(savedData.weight);
           setReps(savedData.reps);
@@ -221,9 +235,15 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     if (!currentExercise) return;
     const fetchHistory = async () => {
       const allSessions = await workoutSessionsRepository.list();
-      
+
+      // Only this routine's sessions: exercise ids are unique per routine, and
+      // filtering keeps histories from different routines from mixing.
+      const routineSessions = allSessions.filter(
+        session => session.routineTemplateId === routineTemplateId
+      );
+
       // Sort by date desc
-      const sortedSessions = [...allSessions].sort((a, b) =>
+      const sortedSessions = routineSessions.sort((a, b) =>
         new Date(b.date).getTime() - new Date(a.date).getTime()
       );
 
@@ -296,10 +316,14 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
     };
 
     fetchHistory();
-  }, [currentExercise, loggedSetsForCurrentExercise, selectedSetType]);
+  }, [currentExercise, loggedSetsForCurrentExercise, routineTemplateId, selectedSetType]);
 
   // Reset exercise-specific guided states when navigation occurs
   useEffect(() => {
+    if (restoredExerciseIndexRef.current === currentExerciseIndex) {
+      restoredExerciseIndexRef.current = null;
+      return;
+    }
     setHasSelectedInitialSetType(false);
     setIsChoosingNextAction(false);
   }, [currentExerciseIndex]);
@@ -438,26 +462,35 @@ export const useWorkoutRunner = (routineTemplateId: string, workout: WorkoutTemp
   }
 
   const onFinishWorkout = async () => {
-    const routine = await routinesRepository.getById(routineTemplateId);
-    const finalWorkoutSession: WorkoutSession = {
-      ...savedWorkoutSession,
-      routineNameSnapshot: routine?.name ?? savedWorkoutSession.routineNameSnapshot,
-      workoutDescriptionSnapshot: currentWorkout.description,
-      workoutDayOfWeekSnapshot: currentWorkout.dayOfWeek,
-      completedAt: new Date().toISOString(),
-      duration: Number(duration),
-      caloriesEstimated: Number(calories),
-    };
+    try {
+      const routine = await routinesRepository.getById(routineTemplateId).catch(error => {
+        // The routine name is only a snapshot; failing to read it must not block saving.
+        console.error('[useWorkoutRunner.onFinishWorkout] routine lookup', error);
+        return null;
+      });
+      const finalWorkoutSession: WorkoutSession = {
+        ...savedWorkoutSession,
+        routineNameSnapshot: routine?.name ?? savedWorkoutSession.routineNameSnapshot,
+        workoutDescriptionSnapshot: currentWorkout.description,
+        workoutDayOfWeekSnapshot: currentWorkout.dayOfWeek,
+        completedAt: new Date().toISOString(),
+        duration: parseOptionalNumber(duration),
+        caloriesEstimated: parseOptionalNumber(calories),
+      };
 
-    console.log('--- TREINO FINALIZADO ---');
-    console.log(JSON.stringify(finalWorkoutSession, null, 2));
-    console.log('-------------------------');
+      await workoutSessionsRepository.save(finalWorkoutSession);
+      await activeWorkoutSessionRepository.clearActiveSession();
 
-    await workoutSessionsRepository.save(finalWorkoutSession);
-    await activeWorkoutSessionRepository.clearActiveSession();
-
-    setIsFinishModalVisible(false);
-    navigation.goBack();
+      setIsFinishModalVisible(false);
+      navigation.goBack();
+    } catch (error) {
+      // Keep the active session stored so the workout is not lost and can be saved again.
+      console.error('[useWorkoutRunner.onFinishWorkout]', error);
+      Alert.alert(
+        'Erro ao salvar',
+        'Não foi possível salvar o treino. Ele continua guardado como treino em andamento. Tente finalizar novamente.'
+      );
+    }
   }
 
   const finishCurrentExercise = () => {

@@ -81,3 +81,26 @@ describe('routinesRepository', () => {
     expect(await AsyncStorage.getItem(STORAGE_KEYS.CUSTOM_ROUTINES)).toContain(legacyRoutine.id);
   });
 });
+
+describe('routinesRepository read errors', () => {
+  beforeEach(async () => {
+    await AsyncStorage.clear();
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('does not overwrite custom routines when stored data cannot be read', async () => {
+    await AsyncStorage.setItem(STORAGE_KEYS.CUSTOM_ROUTINES, '[corrupted');
+
+    await expect(routinesRepository.list()).rejects.toThrow();
+    await expect(routinesRepository.save({
+      id: 'routine_01HF7YAT000000000000000001',
+      name: 'Nova',
+      workouts: [],
+    })).rejects.toThrow();
+    expect(await AsyncStorage.getItem(STORAGE_KEYS.CUSTOM_ROUTINES)).toBe('[corrupted');
+  });
+});

@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { RoutineTemplate } from '@/models/Routine';
 import { routinesRepository } from '@/services/routines/routinesRepository';
@@ -10,23 +11,31 @@ export function useRoutines() {
   const [sessions, setSessions] = useState<WorkoutSession[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const load = async () => {
-    setLoading(true);
-
-    const routines = await routinesRepository.list();
-    const sessions = await workoutSessionsRepository.list();
-    setRoutines(routines);
-    setSessions(sessions);
-
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    load();
+  const load = useCallback(async () => {
+    try {
+      const [nextRoutines, nextSessions] = await Promise.all([
+        routinesRepository.list(),
+        workoutSessionsRepository.list(),
+      ]);
+      setRoutines(nextRoutines);
+      setSessions(nextSessions);
+    } catch (error) {
+      console.error('[useRoutines.load]', error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const isRoutineStartedText = (routineId: string, sessions: WorkoutSession[]) =>
-    sessions.some(s => s.routineTemplateId === routineId) ? 'Em Andamento' : 'Não Iniciado';
+  // Reload whenever the screen regains focus (e.g. after finishing a workout
+  // or editing a routine), not only on the first mount.
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load])
+  );
+
+  const isRoutineStartedText = (routineId: string, sessionList: WorkoutSession[]) =>
+    sessionList.some(s => s.routineTemplateId === routineId) ? 'Em Andamento' : 'Não Iniciado';
 
   return {
     routines,

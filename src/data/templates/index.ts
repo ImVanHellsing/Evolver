@@ -6,5 +6,6 @@ import { RoutineTemplate } from '@/models/Routine';
 export const routineTemplates: RoutineTemplate[] = [
   pplNew as any,
   torsoLibs as any,
-  pplTest as any
+  // "Rotina Teste" is only for development builds; release builds don't ship it.
+  ...(__DEV__ ? [pplTest as any] : []),
 ];

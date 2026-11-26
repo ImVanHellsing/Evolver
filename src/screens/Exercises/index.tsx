@@ -1,5 +1,6 @@
-import React, { useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { Animated, Pressable, ScrollView, Text, View, Alert, PanResponder } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 import { useAppRouteParams } from "@/hooks/useAppRouteParams";
 import { Header } from "@/components/Header";
@@ -13,6 +14,7 @@ import { routinesRepository } from "@/services/routines/routinesRepository";
 import { DayOfWeek, getDayOfWeekMessage } from "@/models/DayOfWeek";
 import { MuscleGroup } from "@/models/MuscleGroup";
 import { createEntityId } from "@/utils/idUtils";
+import { moveWorkoutToDay } from "@/screens/Workouts/workoutSchedule";
 
 import { styles } from "./styles";
 
@@ -129,6 +131,26 @@ export const ExercisesScreen = () => {
   const [isReordering, setIsReordering] = useState(false);
   const [draftExercises, setDraftExercises] = useState<ExerciseTemplate[]>(workout.exercises);
 
+  // Reload the workout when coming back to this screen (e.g. after editing an
+  // exercise description inside the workout runner), so the list is never stale.
+  useFocusEffect(
+    useCallback(() => {
+      if (isReordering) return;
+      let isActive = true;
+      const refresh = async () => {
+        try {
+          const routine = await routinesRepository.getById(routineTemplateId);
+          const updatedWorkout = routine?.workouts.find(item => item.id === workout.id);
+          if (isActive && updatedWorkout) setCurrentWorkout(updatedWorkout);
+        } catch (error) {
+          console.error('[ExercisesScreen.refresh]', error);
+        }
+      };
+      refresh();
+      return () => { isActive = false; };
+    }, [isReordering, routineTemplateId, workout.id])
+  );
+
   const onRunWorkoutPressed = () => {
     if (currentWorkout.exercises.length === 0) return;
     navigation.navigate('WorkoutRunner', { routineTemplateId, workout: currentWorkout });
@@ -226,9 +248,10 @@ export const ExercisesScreen = () => {
       const workoutIndex = routine.workouts.findIndex(w => w.id === currentWorkout.id);
       if (workoutIndex === -1) return;
 
-      // Update the workout
-      routine.workouts[workoutIndex].dayOfWeek = dayOfWeek;
-      routine.workouts[workoutIndex].description = description;
+      // Same rule as the weekly schedule: if another workout already uses the
+      // chosen day, the two workouts swap days instead of sharing one.
+      routine.workouts = moveWorkoutToDay(routine.workouts, currentWorkout.id, dayOfWeek);
+      routine.workouts[workoutIndex] = { ...routine.workouts[workoutIndex], description };
 
       // Save to repository
       await routinesRepository.save(routine);

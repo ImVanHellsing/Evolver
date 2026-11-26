@@ -41,9 +41,14 @@ export const RoutinesScreen = ({ showBackButton = true }: RoutinesScreenProps) =
       createdAt: now,
       updatedAt: now,
     };
-    await routinesRepository.save(newRoutine);
-    setIsCreateModalVisible(false);
-    reload();
+    try {
+      await routinesRepository.save(newRoutine);
+      setIsCreateModalVisible(false);
+      reload();
+    } catch (error) {
+      console.error('[RoutinesScreen.handleCreateRoutine]', error);
+      Alert.alert('Erro', 'Não foi possível criar a rotina. Tente novamente.');
+    }
   };
 
   const onRoutinePressed = (routine: RoutineTemplate) => {
@@ -60,8 +65,13 @@ export const RoutinesScreen = ({ showBackButton = true }: RoutinesScreenProps) =
           text: 'Excluir',
           style: 'destructive',
           onPress: async () => {
-            await routinesRepository.delete(routine.id);
-            reload();
+            try {
+              await routinesRepository.delete(routine.id);
+              reload();
+            } catch (error) {
+              console.error('[RoutinesScreen.deleteRoutine]', error);
+              Alert.alert('Erro', 'Não foi possível excluir a rotina. Tente novamente.');
+            }
           },
         },
       ]

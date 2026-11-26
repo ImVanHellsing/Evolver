@@ -19,9 +19,26 @@ const asCustom = (routine: RoutineTemplate): RoutineTemplate => ({
   source: 'custom',
 });
 
-const readArray = async <T>(key: typeof STORAGE_KEYS[keyof typeof STORAGE_KEYS]) => {
+type StoredKey = typeof STORAGE_KEYS[keyof typeof STORAGE_KEYS];
+
+/**
+ * Returns the stored array, or null when the key does not exist yet.
+ * Throws when the read fails, so a storage error is never mistaken for
+ * "nothing saved" and never triggers a migration that overwrites data.
+ */
+const readArray = async <T>(key: StoredKey): Promise<T[] | null> => {
   const result = await storage.getJson<T[]>(key);
-  return result.ok ? result.data : null;
+  if (!result.ok) {
+    throw new Error(`Não foi possível ler os dados salvos (${key}).`);
+  }
+  return result.data;
+};
+
+const writeArray = async <T>(key: StoredKey, value: T[]): Promise<void> => {
+  const result = await storage.setJson(key, value);
+  if (!result.ok) {
+    throw new Error(`Não foi possível salvar os dados (${key}).`);
+  }
 };
 
 const ensureSeparatedStorage = async () => {
@@ -48,8 +65,8 @@ const ensureSeparatedStorage = async () => {
   const overrides = storedOverrides ?? migratedOverrides;
 
   await Promise.all([
-    storage.setJson(STORAGE_KEYS.CUSTOM_ROUTINES, custom),
-    storage.setJson(STORAGE_KEYS.TEMPLATE_ROUTINE_OVERRIDES, overrides),
+    writeArray(STORAGE_KEYS.CUSTOM_ROUTINES, custom),
+    writeArray(STORAGE_KEYS.TEMPLATE_ROUTINE_OVERRIDES, overrides),
   ]);
 
   return { custom, overrides };
@@ -90,7 +107,7 @@ export const routinesRepository = {
         ? overrides.map(item => item.id === routine.id ? templateOverride : item)
         : [...overrides, templateOverride];
 
-      await storage.setJson(STORAGE_KEYS.TEMPLATE_ROUTINE_OVERRIDES, nextOverrides);
+      await writeArray(STORAGE_KEYS.TEMPLATE_ROUTINE_OVERRIDES, nextOverrides);
       return;
     }
 
@@ -105,7 +122,7 @@ export const routinesRepository = {
       ? custom.map(item => item.id === routine.id ? customRoutine : item)
       : [...custom, customRoutine];
 
-    await storage.setJson(STORAGE_KEYS.CUSTOM_ROUTINES, nextCustom);
+    await writeArray(STORAGE_KEYS.CUSTOM_ROUTINES, nextCustom);
   },
 
   async delete(id: string): Promise<boolean> {
@@ -113,7 +130,7 @@ export const routinesRepository = {
 
     const { custom } = await ensureSeparatedStorage();
     const nextCustom = custom.filter(routine => routine.id !== id);
-    await storage.setJson(STORAGE_KEYS.CUSTOM_ROUTINES, nextCustom);
+    await writeArray(STORAGE_KEYS.CUSTOM_ROUTINES, nextCustom);
     return nextCustom.length !== custom.length;
   },
 
@@ -122,8 +139,8 @@ export const routinesRepository = {
     const overrides = routines.filter(routine => fixedTemplateIds.has(routine.id));
 
     await Promise.all([
-      storage.setJson(STORAGE_KEYS.CUSTOM_ROUTINES, custom),
-      storage.setJson(STORAGE_KEYS.TEMPLATE_ROUTINE_OVERRIDES, overrides),
+      writeArray(STORAGE_KEYS.CUSTOM_ROUTINES, custom),
+      writeArray(STORAGE_KEYS.TEMPLATE_ROUTINE_OVERRIDES, overrides),
     ]);
   },
 };

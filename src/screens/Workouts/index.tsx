@@ -114,10 +114,14 @@ export const WorkoutScreen = () => {
     useCallback(() => {
       let isActive = true;
       const runRefresh = async () => {
-        const updatedRoutine = await routinesRepository.getById(routine.id);
-        if (isActive && updatedRoutine) {
-          setCurrentRoutine(updatedRoutine);
-          if (!isReordering) setDraftWorkouts(updatedRoutine.workouts);
+        try {
+          const updatedRoutine = await routinesRepository.getById(routine.id);
+          if (isActive && updatedRoutine) {
+            setCurrentRoutine(updatedRoutine);
+            if (!isReordering) setDraftWorkouts(updatedRoutine.workouts);
+          }
+        } catch (error) {
+          console.error('[WorkoutScreen.runRefresh]', error);
         }
       };
       runRefresh();
